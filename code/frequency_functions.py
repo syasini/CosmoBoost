@@ -1,0 +1,37 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Jul  2 17:03:33 2017
+
+@author: siavashyasini
+"""
+
+############################################
+#           frequency functions
+############################################
+
+def d2indx(d):
+    return 3-d
+       
+#blackbody frequency spectrum
+def B_nu(nu,T=T_0):
+    '''calculate the BB spectrum (MJy/sr) with a temperature T (K) at frequency nu (GHz)'''
+    return 0.0014745 * nu**3 /(np.exp(0.0479924*nu/(T))-1)
+
+#differential blackbody spectrum 
+def F_nu(nu,T=T_0):
+    '''calculate the differential BB spectrum (MJy/sr) with a temperature T (K) at frequency nu (GHz) '''
+    x = 0.0479924*nu/T
+    f = x*np.exp(x)/(np.exp(x)-1)
+    F = B_nu(nu,T)*f
+    return F
+
+#Doppler derivative of the differential blackbody spectrum (defined in arXiv 1610.00015)
+def F11_nu(nu,T=T_0):
+    '''calculate the differential BB spectrum (11) (MJy/sr) with a temperature T (K) at frequency nu (GHz) '''
+    x = 0.0479924*nu/T
+    f = x*np.exp(x)/(np.exp(x)-1)
+    F = B_nu(nu,T)*f
+    F11 = -3*F + nu*derivative(F_nu,nu,args=(T,))
+    return F11
+
