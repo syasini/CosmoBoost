@@ -1,5 +1,9 @@
+'''
+*********************FileHandler.py***********************
+includes functions for handling (saving/loading) fits files
 
-
+@author: siavashyasini
+'''
 
 import numpy as np
 from astropy.io import fits
