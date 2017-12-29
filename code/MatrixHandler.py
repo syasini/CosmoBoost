@@ -4,7 +4,10 @@
 # In[6]:
 
 import os
-COSMOBOOST_DIR = '/Users/siavashyasini/Dropbox/Cosmology/Projects/2018/cosmoboost'
+import sys
+import numpy as np
+from cosmoboost import COSMOBOOST_DIR
+
 sys.path.insert(0,COSMOBOOST_DIR+'/code')
 
 import FileHandler as fh
