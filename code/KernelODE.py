@@ -30,7 +30,7 @@ def dK_deta(Kstore,eta,Bmatrix):
     
     return K_return
 
-def solve_K_T_ODE(beta, s, delta_ell,lmax,lmin=0,save_kernel=True):
+def solve_K_T_ODE(beta, s, delta_ell,lmax,lmin=0,save_kernel=True,rtol=1.e-8,atol=1.e-8,mxstep=0):
     '''solves the ODE to find the temperature aberration kernel elements
     uses Eq. 44 in Dai, Chluba 2014 arXiv:1403.6117v2
     
@@ -121,7 +121,7 @@ def solve_K_T_ODE(beta, s, delta_ell,lmax,lmin=0,save_kernel=True):
     #solve the ODE for a range of ell'  between lmin and lmax
     #the derivative of the aberration kernel with respect to eta is defined in Kernel_recursive.py
     #start_ode = timer()
-    sol = odeint(dK_deta,K0,eta,args=(Bmatrix,),printmessg=True)
+    sol = odeint(dK_deta,K0,eta,args=(Bmatrix,),rtol=rtol,atol=atol,mxstep=mxstep,printmessg=True)
     
     #end_ode = timer()
     #print "ode: ", end_ode-start_ode
