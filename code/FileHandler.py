@@ -9,18 +9,19 @@ import numpy as np
 from astropy.io import fits
 import os
 from cosmoboost import DEFAULT_PARS
+from cosmoboost import COSMOBOOST_DIR
 import warnings
 
 
 
 def dirname(beta,lmax):
     '''returns the local directory address where the fits file should be saved'''
-    return  "../data/beta_"+str(beta)[2:]+"/lmax_"+str(lmax) 
+    return  COSMOBOOST_DIR+"/data/beta_"+str(beta)[2:]+"/lmax_"+str(lmax)
 
 
-def filename(X,s,lmax,delta_ell,beta):
+def filename(s,lmax,delta_ell,beta):
     '''returns the name of the fits file based on params'''
-    return dirname(beta,lmax)+"/"+str(X)+"(d=1_s="+str(s)+")_lmax"+str(lmax)+"_delta"+str(delta_ell)+"_beta"+str(beta)[2:]+".fits"
+    return dirname(beta,lmax)+"/d=1_s="+str(s)+"_delta"+str(delta_ell)+"_lmax"+str(lmax)+"_beta"+str(beta)[2:]+".fits"
 
 
 def init_fits(file_name):
