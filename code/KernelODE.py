@@ -98,8 +98,6 @@ def solve_K_T_ODE(beta, s, delta_ell,lmax,lmin=0,save_kernel=True,rtol=1.e-8,ato
     Bmatrix = Blms[Lmatrix,Mmatrix]
     Bmatrix[np.isnan(Bmatrix)]=0
     
-    Cmatrix = Clms[Lmatrix,Mmatrix]
-    Cmatrix[np.isnan(Bmatrix)]=0
     
     
 
@@ -152,7 +150,7 @@ def solve_K_T_ODE(beta, s, delta_ell,lmax,lmin=0,save_kernel=True,rtol=1.e-8,ato
         fh.save_matrices(matrices_file_name,Mmatrix,'M')
         fh.save_matrices(matrices_file_name,Lpmatrix,'LP')
         fh.save_matrices(matrices_file_name,Lmatrix,'L')
-        fh.save_matrices(matrices_file_name,Cmatrix,'CS'+str(s))
+        fh.save_matrices(matrices_file_name,Clms,'CS'+str(s))
         #np.save(C_filename,Blms)
         
 
