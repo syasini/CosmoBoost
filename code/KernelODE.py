@@ -87,16 +87,19 @@ def solve_K_T_ODE(beta, s, delta_ell,lmax,lmin=0,save_kernel=True,rtol=1.e-8,ato
     
     
     
-    Mmatrix,_,Lmatrix, = mh.MLpL_matrix(delta_ell=delta_ell,lmax=lmax)
+    Mmatrix,Lpmatrix,Lmatrix, = mh.MLpL_matrix(delta_ell=delta_ell,lmax=lmax)
     
     
     #construct the Bmatrix corresponding to the elements of K0
     
     
-    Blms,_ = mh.Blm_Clm(delta_ell,lmax,s=0)
+    Blms,Clms = mh.Blm_Clm(delta_ell,lmax,s=s)
     #Clms = np.true_divide(Blms,1)
     Bmatrix = Blms[Lmatrix,Mmatrix]
     Bmatrix[np.isnan(Bmatrix)]=0
+    
+    Cmatrix = Clms[Lmatrix,Mmatrix]
+    Cmatrix[np.isnan(Bmatrix)]=0
     
     
 
@@ -127,7 +130,7 @@ def solve_K_T_ODE(beta, s, delta_ell,lmax,lmin=0,save_kernel=True,rtol=1.e-8,ato
     #print "ode: ", end_ode-start_ode
     #store the results in the K_T matrix
     K_T = sol[N-1].reshape(height,width)
-
+    
 
 
     end = timer()
@@ -137,18 +140,24 @@ def solve_K_T_ODE(beta, s, delta_ell,lmax,lmin=0,save_kernel=True,rtol=1.e-8,ato
     
     if save_kernel: 
         
-        file_name = fh.filename(s=s,lmax=lmax,delta_ell=delta_ell,beta=beta)
+        kernel_file_name = fh.kernel_filename(s=s,lmax=lmax,delta_ell=delta_ell,beta=beta)
+        matrices_file_name = fh.matrices_filename(s=s,lmax=lmax,delta_ell=delta_ell,beta=beta)
         dir_name = fh.dirname(lmax=lmax,beta=beta)
         if not os.path.exists(dir_name):
             os.makedirs(dir_name)
         
-        #if (os.path.isdir(K_dirname)): 
-        fh.save_matrix(file_name,K_T,'k')
-        fh.save_matrix(file_name,Bmatrix,'b')
+        #save the kernel
+        fh.save_kernel(kernel_file_name,K_T,'T')
+        #save the other matrices
+        fh.save_matrices(matrices_file_name,Mmatrix,'M')
+        fh.save_matrices(matrices_file_name,Lpmatrix,'LP')
+        fh.save_matrices(matrices_file_name,Lmatrix,'L')
+        fh.save_matrices(matrices_file_name,Cmatrix,'CS'+str(s))
         #np.save(C_filename,Blms)
         
 
-        print "temperature kernel saved at: " + file_name
+        print "Kernel saved in: " + kernel_file_name
+        print "Matrices saved in: " + kernel_file_name
     
     return K_T
 
