@@ -19,13 +19,18 @@ def dirname(beta,lmax):
     return  COSMOBOOST_DIR+"/data/beta_"+str(beta)[2:]+"/lmax_"+str(lmax)
 
 
-def kernel_filename(s,delta_ell,beta,lmax):
+def kernel_filename(pars):
     '''returns the name and address of the fits file based on params'''
-    return dirname(beta,lmax)+"/K_d=1_s="+str(s)+"_delta"+str(delta_ell)+"_lmax"+str(lmax)+"_beta"+str(beta)[2:]+".fits"
+    
+    return dirname(pars['beta'],pars['lmax'])+ \
+            "/K_d=1_s="+str(pars['s']) +"_delta"+str(pars['delta_ell'])+\
+            "_lmax"+str(pars['lmax'])+"_beta"+str(pars['beta'])[2:]+".fits"
 
-def matrices_filename(s,delta_ell,beta,lmax):
+def matrices_filename(pars):
     '''returns the name and address of the fits file based on params'''
-    return dirname(beta,lmax)+"/M_d=1_s="+str(s)+"_delta"+str(delta_ell)+"_lmax"+str(lmax)+"_beta"+str(beta)[2:]+".fits"
+    return dirname(pars['beta'],pars['lmax'])+ \
+            "/M_d=1_s="+str(pars['s']) +"_delta"+str(pars['delta_ell'])+\
+            "_lmax"+str(pars['lmax'])+"_beta"+str(pars['beta'])[2:]+".fits"
 
 
 def init_kernel_fits(kernel_file_name):
@@ -108,7 +113,7 @@ def save_matrices(matrices_file_name, matrix, key='M',overwrite=False):
     file_exists = os.path.isfile(str(matrices_file_name))
     if (not file_exists or overwrite==True):
         #initialize the fits file if it doesn't already exist
-        print "initializing fits file...\n"
+        print "initializing fits file for the matrices...\n"
         init_matrices_fits(matrices_file_name)
     
     #open the file in update mode and write the matrix in the appropriate HDU, then close it
