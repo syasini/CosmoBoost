@@ -65,13 +65,13 @@ def init_matrices_fits(matrices_file_name):
     #*note that the keyword for the aberration kernel matrix is "primary"
     M_hdu = fits.PrimaryHDU()
     M_hdu.name = "M"
-    LP_hdu = fits.ImageHDU(name="LP")
+    #LP_hdu = fits.ImageHDU(name="LP")
     L_hdu = fits.ImageHDU(name="L")
     CS0_hdu = fits.ImageHDU(name="CS0")
     CS2_hdu = fits.ImageHDU(name="CS2")
     S_hdu = fits.ImageHDU(name="S")
     
-    hdus = [M_hdu,LP_hdu,L_hdu,CS0_hdu,CS2_hdu,S_hdu]
+    hdus = [M_hdu,L_hdu,CS0_hdu,CS2_hdu,S_hdu]
     
     #concatenate the HDUs into an HDUList and write to fits file
     hdulist = fits.HDUList(hdus)
