@@ -49,8 +49,27 @@ def Blm_Clm(delta_ell, lmax,s):
     return Blm,Clm
 
 
+def ML_matrix(delta_ell,lmax,lmin=0):
+    '''finds the Mmatrix and Lmatrix:
+    the Xmatrix returns the x index values for each element of the kernel matrix'''
+    
+    #height, width = ((lmax+1)*(lmax+2)/2,2*delta_ell+1)
+    width = 2*delta_ell+1
+    
+    Mmatrix= np.array([])
+    Lpmatrix = np.array([])
+    
+    
+    Mmatrix = np.concatenate([m*np.ones(lmax+1-max(lmin,m)) for m in  xrange(0,lmax+1)])
+    Lpmatrix = np.concatenate([np.arange(max(lmin,m),lmax+1) for m in  xrange(0,lmax+1)])
+    
+        
+    Mmatrix = np.tensordot(Mmatrix,np.ones(width),axes=0)
+    Lpmatrix = np.tensordot(Lpmatrix,np.ones(width),axes=0)    
+    Lmatrix = Lpmatrix + np.arange(-delta_ell,delta_ell+1)
 
-# In[54]:
+    return Mmatrix.astype(int),Lmatrix.astype(int)
+
 
 def MLpL_matrix(delta_ell,lmax,lmin=0):
     '''finds the Mmatrix, Lpmatrix and Lmatrix:
