@@ -30,6 +30,38 @@ def dK_deta(Kstore,eta,Bmatrix):
     
     return K_return
 
+def dK_deta_loop(K_ellp,eta,m,ellp):
+    '''The derivative of the Kernel for index m and lp'''
+    #set index m to the predefined value M
+    #m = M
+    
+    #determine the length of the input kernel array K
+    l_max = len(K_ellp)
+    
+    #initialize the output kernel array Kp with the same size as the input array K
+    Kp_ellp = np.zeros(l_max)
+    
+    #pick the range \pm delta_ell around lp to loop over
+    #the other elements of the kernel are essentially zero
+    #so the loop goes only over the non-zero values to speed up the code
+    
+    
+    L = np.arange(ellp-delta_ell,ellp+delta_ell+1)
+    L = L[L>=0]
+    L = L[L<=l_max-1]
+    #print L
+    #define the derivative according to the ODE (eq. 44 in Dai, Chluba 2014)
+    
+    for l in L:
+        #Kp_ellp[l] = + (0.0,Blm[l+1,m]*K_ellp[l+1])[l<l_max] - (0.0,Blm[l,m]*K_ellp[l-1])[l>0]
+        if l == 0: Kp_ellp[0] = Blm[1,m]*K_ellp[1]
+        elif l == l_max-1: Kp_ellp[l_max-1] = -Blm[l_max-1,m]*K_ellp[l_max-2]
+        else: Kp_ellp[l] = + Blm[l+1,m]*K_ellp[l+1] - Blm[l,m]*K_ellp[l-1]
+    
+    
+    return Kp_ellp
+
+
 def solve_K_T_ODE(beta, s, delta_ell,lmax,lmin=0,save_kernel=True,rtol=1.e-8,atol=1.e-8,mxstep=0):
     '''solves the ODE to find the temperature aberration kernel elements
     uses Eq. 44 in Dai, Chluba 2014 arXiv:1403.6117v2
@@ -87,7 +119,7 @@ def solve_K_T_ODE(beta, s, delta_ell,lmax,lmin=0,save_kernel=True,rtol=1.e-8,ato
     
     
     
-    Mmatrix,Lpmatrix,Lmatrix, = mh.MLpL_matrix(delta_ell=delta_ell,lmax=lmax)
+    Mmatrix,Lmatrix = mh.ML_matrix(delta_ell=delta_ell,lmax=lmax)
     
     
     #construct the Bmatrix corresponding to the elements of K0
@@ -146,9 +178,10 @@ def solve_K_T_ODE(beta, s, delta_ell,lmax,lmin=0,save_kernel=True,rtol=1.e-8,ato
         
         #save the kernel
         fh.save_kernel(kernel_file_name,K_T,'T')
-        #save the other matrices
+        
+        muse #save the other matrices
         fh.save_matrices(matrices_file_name,Mmatrix,'M')
-        fh.save_matrices(matrices_file_name,Lpmatrix,'LP')
+        #fh.save_matrices(matrices_file_name,Lpmatrix,'LP')
         fh.save_matrices(matrices_file_name,Lmatrix,'L')
         fh.save_matrices(matrices_file_name,Clms,'CS'+str(s))
         #np.save(C_filename,Blms)
