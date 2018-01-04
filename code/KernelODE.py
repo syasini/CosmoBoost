@@ -62,7 +62,7 @@ def dK_deta_loop(K_ellp,eta,m,ellp):
     return Kp_ellp
 
 
-def solve_K_T_ODE(beta, s, delta_ell,lmax,lmin=0,save_kernel=True,rtol=1.e-8,atol=1.e-8,mxstep=0):
+def solve_K_T_ODE(pars,save_kernel=True,rtol=1.e-5,atol=1.e-5,mxstep=0):
     '''solves the ODE to find the temperature aberration kernel elements
     uses Eq. 44 in Dai, Chluba 2014 arXiv:1403.6117v2
     
@@ -93,6 +93,12 @@ def solve_K_T_ODE(beta, s, delta_ell,lmax,lmin=0,save_kernel=True,rtol=1.e-8,ato
     start = timer()
     print "calculating the Doppler and aberration Kernel elements..."
     
+    beta = pars['beta']
+    s = pars['s']
+    delta_ell = pars['delta_ell']
+    lmax = pars['lmax']
+    lmin= pars['lmin']
+    
     #set the height and width of the aberration kernel storage matrix.
     #the storage matrix is set around each value of ell' for a neighborhood of delta_ell
     #on each side. The middle value of each row corresponds to ell'=ell or delta_ell=0
@@ -108,8 +114,8 @@ def solve_K_T_ODE(beta, s, delta_ell,lmax,lmin=0,save_kernel=True,rtol=1.e-8,ato
 
     #initialze K_T to store the temperature aberration kernel matrix
     #after solving the ODE
-    K_T = np.empty((height,width))
-    K_T.fill(np.nan)
+    #K_T = np.empty((height,width))
+    #K_T.fill(np.nan)
 
     #evaluate the Blm coefficients
     #Blm = get_Blm(delta_ell=delta_ell,lmax=lmax,lmin=lmin,s=s)
@@ -131,13 +137,15 @@ def solve_K_T_ODE(beta, s, delta_ell,lmax,lmin=0,save_kernel=True,rtol=1.e-8,ato
     Bmatrix[np.isnan(Bmatrix)]=0
     
     
-    
+    #pad the K and B matrices to avoid leakage from the edges
+    K0 = np.insert(K0,[2*delta_ell+1,2*delta_ell+1],0,axis=1)
+    Bmatrix = np.insert(Bmatrix,[2*delta_ell+1,2*delta_ell+1],0,axis=1)
 
     #reshape all the 2D matrices to 1D arrays so that the ODE can be solved in vectorized mode
-    K0 = K0.reshape(width*height)
-    K_T = K_T.reshape(width*height)
+    K0 = K0.reshape((width+2)*height)
+    #K_T = K_T.reshape((width+2)*height)
     #Bmatrix = np.ones((width,height))
-    Bmatrix = Bmatrix.reshape(width*height)
+    Bmatrix = Bmatrix.reshape((width+2)*height)
     
     
     
@@ -159,8 +167,9 @@ def solve_K_T_ODE(beta, s, delta_ell,lmax,lmin=0,save_kernel=True,rtol=1.e-8,ato
     #end_ode = timer()
     #print "ode: ", end_ode-start_ode
     #store the results in the K_T matrix
-    K_T = sol[N-1].reshape(height,width)
+    K_T = sol[N-1].reshape(height,width+2)
     
+    K_T = np.delete(K_T,[2*delta_ell+1,2*delta_ell+2],axis=1)
 
 
     end = timer()
@@ -170,8 +179,8 @@ def solve_K_T_ODE(beta, s, delta_ell,lmax,lmin=0,save_kernel=True,rtol=1.e-8,ato
     
     if save_kernel: 
         
-        kernel_file_name = fh.kernel_filename(s=s,lmax=lmax,delta_ell=delta_ell,beta=beta)
-        matrices_file_name = fh.matrices_filename(s=s,lmax=lmax,delta_ell=delta_ell,beta=beta)
+        kernel_file_name = fh.kernel_filename(pars)
+        matrices_file_name = fh.matrices_filename(pars)
         dir_name = fh.dirname(lmax=lmax,beta=beta)
         if not os.path.exists(dir_name):
             os.makedirs(dir_name)
@@ -179,7 +188,7 @@ def solve_K_T_ODE(beta, s, delta_ell,lmax,lmin=0,save_kernel=True,rtol=1.e-8,ato
         #save the kernel
         fh.save_kernel(kernel_file_name,K_T,'T')
         
-        muse #save the other matrices
+        #save the other matrices
         fh.save_matrices(matrices_file_name,Mmatrix,'M')
         #fh.save_matrices(matrices_file_name,Lpmatrix,'LP')
         fh.save_matrices(matrices_file_name,Lmatrix,'L')
