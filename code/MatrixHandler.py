@@ -1,8 +1,3 @@
-
-# coding: utf-8
-
-# In[6]:
-
 import os
 import sys
 import numpy as np
@@ -13,18 +8,18 @@ sys.path.insert(0,COSMOBOOST_DIR+'/code')
 import FileHandler as fh
 
 
-# In[53]:
 
 #######################################################
-#      calculate the B,C,M,Lp,L,S martices
+#              B,C,M,Lp,L,S matrices
 #######################################################
 
 def Blm_Clm(delta_ell, lmax,s):
     '''calculate the Blm coefficients for the aberration kernel ODE
     uses #Eq. 23 in Dai, Chluba 2014 arXiv:1403.6117v2'''
     
-    ell = np.arange(0,lmax+1+delta_ell) #arange the ell array from lmin to lmax
+    ell = np.arange(0,lmax+1) #arange the ell array from lmin to lmax
                                         #the Blm coefficients will be calcualted for these values
+    ell = np.append(ell,np.zeros(delta_ell))
     
     L,M = np.meshgrid(ell,ell,indexing="ij")                             
                                  
@@ -93,9 +88,8 @@ def MLpL_matrix(delta_ell,lmax,lmin=0):
     return Mmatrix.astype(int),Lpmatrix.astype(int),Lmatrix.astype(int)
 
 
-# In[ ]:
 
-def S_matrix(Lmatrix,Mmatrix,s):
+def S_matrix(Lmatrix,Mmatrix,s=0):
     '''finds the Smatrix:
     the Smatrix returns the s index values for each element of the kernel matrix for polarized observables'''
     
@@ -103,10 +97,26 @@ def S_matrix(Lmatrix,Mmatrix,s):
     Smatrix[~np.isfinite(Smatrix)]=0
     return Smatrix
 
+def minus_one_LplusLp(delta_ell,lmax):
+    '''calculates (-1)**(l+lp)'''
+ 
+    height, width = ((lmax+1)*(lmax+2)/2,2*delta_ell+1)
+    
+    row = (-1)**np.arange(1,width+1)
+    minus_one = np.tensordot(np.ones(height),test,axes=0)
+    
+    return minus_one
+    
+    
+def transpose(kernel,delta_ell):
+    '''calculates the transpose kernel (K_mllp)'''
+    
+    inv = np.zeros(kernel.shape)
+    for i in xrange(2*delta_ell+1):
+        inv[:,i] = shift(kernel[:,2*delta_ell-i],i-delta_ell)
+    
+    return inv
 
-
-
-# In[ ]:
 
 #######################################################
 #         functions for shifting the rows 
@@ -148,4 +158,18 @@ def shift_down(arr):
     
     return arr
 
-
+def shift(arr,j):
+    '''shift up +j / shift down -j'''
+    if j==0:
+        return arr
+    
+    elif j>0:
+        
+        arr = np.roll(arr,-j,axis=0)
+        arr[-j:]=0
+        return arr
+    
+    elif j<0:
+        arr = np.roll(arr,-j,axis=0)
+        arr[0:-j]=0
+        return arr
