@@ -10,8 +10,13 @@ from astropy.io import fits
 import os
 from cosmoboost import DEFAULT_PARS
 from cosmoboost import COSMOBOOST_DIR
-#import warnings
 
+
+
+
+#######################################################
+#             file and directory names 
+#######################################################
 
 
 def dirname(beta,lmax):
@@ -31,6 +36,17 @@ def matrices_filename(pars):
     return dirname(pars['beta'],pars['lmax'])+ \
             "/M_d=1_s="+str(pars['s']) +"_delta"+str(pars['delta_ell'])+\
             "_lmax"+str(pars['lmax'])+"_beta"+str(pars['beta'])[2:]+".fits"
+
+def file_exists(file_name):
+    '''check to see if the fits file exists in the given address'''
+    
+    return os.path.isfile(str(file_name))
+
+
+
+#######################################################
+#             fits file initialization
+#######################################################
 
 
 def init_kernel_fits(kernel_file_name):
@@ -76,16 +92,21 @@ def init_matrices_fits(matrices_file_name):
     CS2_hdu = fits.ImageHDU(name="CS2")
     S_hdu = fits.ImageHDU(name="S")
     
+    #hdus = [M_hdu,LP_hdu,L_hdu,CS0_hdu,CS2_hdu,S_hdu]
     hdus = [M_hdu,L_hdu,CS0_hdu,CS2_hdu,S_hdu]
     
     #concatenate the HDUs into an HDUList and write to fits file
     hdulist = fits.HDUList(hdus)
     hdulist.writeto(str(matrices_file_name),overwrite=True)
 
-def file_exists(file_name):
-    '''check to see if the fits file exists in the given address'''
+
     
-    return os.path.isfile(str(file_name))
+
+
+#######################################################
+#              file saving / loading
+#######################################################
+
 
 def save_kernel(kernel_file_name, kernel, key='T',overwrite=False):
     '''saves the kernel chosen by 'key' to the fits file
