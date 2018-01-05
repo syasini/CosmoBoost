@@ -103,7 +103,7 @@ def minus_one_LplusLp(delta_ell,lmax):
     height, width = ((lmax+1)*(lmax+2)/2,2*delta_ell+1)
     
     row = (-1)**np.arange(1,width+1)
-    minus_one = np.tensordot(np.ones(height),test,axes=0)
+    minus_one = np.tensordot(np.ones(height),row,axes=0)
     
     return minus_one
     
