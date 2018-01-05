@@ -124,14 +124,18 @@ def solve_K_T_ODE(pars,save_kernel=True,rtol=1.e-5,atol=1.e-5,mxstep=0):
     #the elements of these matrices return the ell and m indices stored in that spot
     
     
-    
-    Mmatrix,Lmatrix = mh.ML_matrix(delta_ell=delta_ell,lmax=lmax)
+    matrices_file_name = fh.matrices_filename(pars)
+    if fh.file_exists(matrices_file_name):
+        Mmatrix = fh.load_matrix(matrices_file_name,key='M')
+        Lmatrix = fh.load_matrix(matrices_file_name,key='L')
+    else:
+        Mmatrix,Lmatrix = mh.ML_matrix(delta_ell=delta_ell,lmax=lmax)
     
     
     #construct the Bmatrix corresponding to the elements of K0
     
     
-    Blms,Clms = mh.Blm_Clm(delta_ell,lmax,s=s)
+    Blms,_ = mh.Blm_Clm(delta_ell,lmax,s=s)
     #Clms = np.true_divide(Blms,1)
     Bmatrix = Blms[Lmatrix,Mmatrix]
     Bmatrix[np.isnan(Bmatrix)]=0
@@ -180,24 +184,26 @@ def solve_K_T_ODE(pars,save_kernel=True,rtol=1.e-5,atol=1.e-5,mxstep=0):
     if save_kernel: 
         
         kernel_file_name = fh.kernel_filename(pars)
-        matrices_file_name = fh.matrices_filename(pars)
+        #matrices_file_name = fh.matrices_filename(pars)
         dir_name = fh.dirname(lmax=lmax,beta=beta)
         if not os.path.exists(dir_name):
+            "directory created."
             os.makedirs(dir_name)
         
         #save the kernel
         fh.save_kernel(kernel_file_name,K_T,'T')
         
         #save the other matrices
-        fh.save_matrices(matrices_file_name,Mmatrix,'M')
+        #fh.save_matrices(matrices_file_name,Mmatrix,'M')
         #fh.save_matrices(matrices_file_name,Lpmatrix,'LP')
-        fh.save_matrices(matrices_file_name,Lmatrix,'L')
-        fh.save_matrices(matrices_file_name,Clms,'CS'+str(s))
+        #fh.save_matrices(matrices_file_name,Lmatrix,'L')
+        #fh.save_matrices(matrices_file_name,Clms,'CS'+str(s))
         #np.save(C_filename,Blms)
         
 
         print "Kernel saved in: " + kernel_file_name
-        print "Matrices saved in: " + kernel_file_name
+        #print "Matrices saved in: " + kernel_file_name
+    
     
     return K_T
 
