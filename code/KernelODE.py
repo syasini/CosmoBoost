@@ -62,7 +62,7 @@ def dK_deta_loop(K_ellp,eta,m,ellp):
     return Kp_ellp
 
 
-def solve_K_T_ODE(pars,save_kernel=True,rtol=1.e-5,atol=1.e-5,mxstep=0):
+def solve_K_T_ODE(pars,save_kernel=True,rtol=1.e-6,atol=1.e-6,mxstep=0):
     '''solves the ODE to find the temperature aberration kernel elements
     uses Eq. 44 in Dai, Chluba 2014 arXiv:1403.6117v2
     
@@ -191,7 +191,7 @@ def solve_K_T_ODE(pars,save_kernel=True,rtol=1.e-5,atol=1.e-5,mxstep=0):
             os.makedirs(dir_name)
         
         #save the kernel
-        fh.save_kernel(kernel_file_name,K_T,'T')
+        fh.save_kernel(kernel_file_name,K_T,'D1')
         
         #save the other matrices
         #fh.save_matrices(matrices_file_name,Mmatrix,'M')
