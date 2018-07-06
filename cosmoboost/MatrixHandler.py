@@ -119,6 +119,24 @@ def transpose(kernel,delta_ell):
 
 
 #######################################################
+#                  Index and binning functions
+#######################################################
+
+
+def mlp2indx(m,lp,lmax,lmin=0):
+    return m*(2*(lmax)+1-m)/2+lp
+
+
+def getindxminmax(m,l,lmin,lmax):
+    if m <= lmin : return l + (1+lmax)*m-lmin*(1+m)
+    else: return (2*l-(1+lmin)*lmin+(2*lmax-m+1)*(m))/2
+
+def bin_array(array,bin_size):
+    binned_array = array[:(array.size // bin_size) * bin_size].reshape(-1, bin_size).mean(axis=1)
+
+    return binned_array
+
+#######################################################
 #         functions for shifting the rows 
 #           and columns of the matrices
 #######################################################

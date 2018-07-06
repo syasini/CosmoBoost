@@ -8,7 +8,7 @@
 import numpy as np
 from astropy.io import fits
 import os
-from cosmoboost import DEFAULT_PARS
+
 from cosmoboost import COSMOBOOST_DIR
 
 
@@ -21,7 +21,7 @@ from cosmoboost import COSMOBOOST_DIR
 
 def dirname(beta,lmax):
     '''returns the local directory address where the fits file should be saved'''
-    return  COSMOBOOST_DIR+"/data/beta_"+str(beta)[2:]+"/lmax_"+str(lmax)
+    return  COSMOBOOST_DIR+"/data/beta_"+str(beta)+"/lmax_"+str(lmax)
 
 
 def kernel_filename(pars):
@@ -29,13 +29,13 @@ def kernel_filename(pars):
     
     return dirname(pars['beta'],pars['lmax'])+ \
         "/K_T_s="+str(np.abs(pars['s'])) +"_delta"+str(pars['delta_ell'])+\
-        "_lmax"+str(pars['lmax'])+"_beta"+str(pars['beta'])[2:]+".fits"
+        "_lmax"+str(pars['lmax'])+"_beta"+str(pars['beta'])+".fits"
 
 def matrices_filename(pars):
     '''returns the name and address of the fits file based on params'''
     return dirname(pars['beta'],pars['lmax'])+ \
         "/M_s="+str(np.abs(pars['s'])) +"_delta"+str(pars['delta_ell'])+\
-        "_lmax"+str(pars['lmax'])+"_beta"+str(pars['beta'])[2:]+".fits"
+        "_lmax"+str(pars['lmax'])+"_beta"+str(pars['beta'])+".fits"
 
 def file_exists(file_name):
     '''check to see if the fits file exists in the given address'''

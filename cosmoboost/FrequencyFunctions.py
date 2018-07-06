@@ -5,6 +5,7 @@ Created on Sun Jul  2 17:03:33 2017
 
 @author: siavashyasini
 """
+import numpy as np
 
 ############################################
 #           frequency functions

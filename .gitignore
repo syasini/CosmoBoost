@@ -1,0 +1,4 @@
+/data
+cosmoboost/ipynb
+cosmoboost/.ipynb_checkpoints
+*.fits
