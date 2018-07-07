@@ -47,7 +47,7 @@ class Kernel(object):
     def __init__(self, pars=DEFAULT_PARS,
                  overwrite=False,save_kernel=True):
         
-        #self._pars = pars
+        # self._pars = pars
         
         self.d = pars['d']
         
@@ -300,7 +300,8 @@ def deboost_alm(alm,kernel,*nu):
 def _deboost_almT(almT,kernel):
     '''deboost temperature multipoles almT (s=0)'''
     
-    
+
+    print "deboosting almT\n"
     #if (almT.shape[0]!=1) : raise ValueError('almT.shape!=1')
     if (kernel.s !=0):
         kernel.s=0
@@ -327,6 +328,8 @@ def _deboost_almT(almT,kernel):
 
 def _deboost_almEB(almE,almB,kernel):
     '''deboost polarization multipoles almE and almB (s=2)'''
+
+    print "deboosting almEB\n"
     #if (almE.shape[0]!=1) : raise ValueError('almT.shape!=1')
     if (kernel.s !=2):
         kernel.s=2
