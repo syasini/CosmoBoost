@@ -22,8 +22,6 @@ import KernelODE
 import KernelRecursive as kr
 
 
-
-
 DEFAULT_PARS = {
     'd' : 1,
     's' : 0,
@@ -272,8 +270,10 @@ def deboost_alm(alm,kernel,*nu):
     boosted_alm = np.zeros(alm.shape,dtype=np.complex)
     
     #set the first column to boosted almT
-    boosted_alm[0] = _deboost_almT(almT,kernel)
-    
+    if nu:
+        boosted_alm[0] = _deboost_almT(almT,kernel,nu[0])
+    else:
+        boosted_alm[0] = _deboost_almT(almT, kernel)
     #return boosted T if alm is 1 dim
     if alm.shape[0] == 1:
         return boosted_alm[0]
@@ -286,9 +286,11 @@ def deboost_alm(alm,kernel,*nu):
         
         boosted_almE = np.zeros(almE.shape)
         boosted_almB = np.zeros(almB.shape)
-        
-        
-        boosted_alm[1:3] = _deboost_almEB(almE,almB,kernel)
+
+        if nu:
+            boosted_alm[1:3] = _deboost_almEB(almE,almB,kernel,nu[0])
+        else:
+            boosted_alm[1:3] = _deboost_almEB(almE, almB, kernel)
         
     
 
@@ -297,7 +299,7 @@ def deboost_alm(alm,kernel,*nu):
 
 
 
-def _deboost_almT(almT,kernel):
+def _deboost_almT(almT,kernel,*nu):
     '''deboost temperature multipoles almT (s=0)'''
     
 
@@ -320,13 +322,17 @@ def _deboost_almT(almT,kernel):
     
     print almT.shape
     print almT[mh.mlp2indx(Mmatrix,Lmatrix,lmax)].shape
-    
-    alm_boosted = np.sum(kernel.mlpl*almT[mh.mlp2indx(Mmatrix,Lmatrix,lmax)],axis=1 )    
+
+    if nu:
+        print "\n boosting with nu={}\n\n".format(nu[0])
+        alm_boosted = np.sum(kernel.nu_mlpl(nu[0])*almT[mh.mlp2indx(Mmatrix,Lmatrix,lmax)],axis=1 )
+    else:
+        alm_boosted = np.sum(kernel.mlpl * almT[mh.mlp2indx(Mmatrix, Lmatrix, lmax)], axis=1)
     
     return alm_boosted
 
 
-def _deboost_almEB(almE,almB,kernel):
+def _deboost_almEB(almE,almB,kernel,*nu):
     '''deboost polarization multipoles almE and almB (s=2)'''
 
     print "deboosting almEB\n"
@@ -334,14 +340,18 @@ def _deboost_almEB(almE,almB,kernel):
     if (kernel.s !=2):
         kernel.s=2
         kernel.update()
-    
-    kernel_plus = kernel.mlpl
+    if nu:
+        kernel_plus = kernel.nu_mlpl(nu[0])
+    else:
+        kernel_plus = kernel.mlpl
     
     kernel.s = -2
     kernel.update()
-    
-    kernel_minus= kernel.mlpl
-    
+
+    if nu:
+        kernel_minus= kernel.nu_mlpl(nu[0])
+    else:
+        kernel_minus = kernel.mlpl
     kernelEE_mlpl = 0.5 *(kernel_plus + kernel_minus)
     kernelEB_mlpl = 0.5j*(kernel_plus - kernel_minus)
     
