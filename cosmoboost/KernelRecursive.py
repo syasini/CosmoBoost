@@ -118,7 +118,7 @@ def calc_K_d_arr(K,d,s):
     -------
         ndarray(beta_exp_order,(lmax+1)*(lmax+2)/2,2*delta_ell+1)
     '''
-    height, width = ((K.lmax+1)*(K.lmax+2)/2,2*K.delta_ell+1)
+    height, width = ((K.lmax+1)*(K.lmax+2)//2,2*K.delta_ell+1)
     K_d_arr = np.zeros((K.beta_exp_order+1,height,width))
     for i in range(d,d-K.beta_exp_order-1,-1):
         print("d, i = {},{}".format(d,i))
@@ -138,13 +138,15 @@ def K_nu_d(K_d_arr,nu,pars,freq_func=ff.F_nu,dmod="sp",return_normalize=True):
     #if (N > 3): print "the expansion order must be < 3"
     
     Kernel = 0.0
-    for beta_order in xrange(beta_exp_order+1):
+    for n in range(beta_exp_order+1):
         kfactor = 0.0
-        for k in xrange(beta_order+1):
+        for k in range(n+1):
             Klplm=K_d_arr[k]
-            kfactor +=  Klplm *(-1.0)**(beta_order+k) * comb(beta_order,k)
+            kfactor +=  Klplm *(-1.0)**(n+k) * comb(n,k)
         
-        Kernel += kfactor/factorial(beta_order)*nu**beta_order * derivative(freq_func,nu,dx =dx,n=beta_order,args=(T,),order=21) # calculate the derivative with scipy
+        Kernel += kfactor/factorial(n)*nu**n * derivative(freq_func,nu,dx =dx,
+                                                                   n=n,args=(T,),order=13) #
+        # calculate the derivative with scipy
     
     if return_normalize:
         return np.true_divide(Kernel, freq_func(nu, pars['T_0']))

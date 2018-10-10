@@ -104,7 +104,7 @@ def solve_K_T_ODE(pars,save_kernel=True,rtol=1.e-6,atol=1.e-6,mxstep=0):
     #the storage matrix is set around each value of ell' for a neighborhood of delta_ell
     #on each side. The middle value of each row corresponds to ell'=ell or delta_ell=0
     #the number of columns corresponds to different values of ell' for each m mode. 
-    height, width = ((lmax+1)*(lmax+2)/2,2*delta_ell+1)
+    height, width = ((lmax+1)*(lmax+2)//2,2*delta_ell+1)
     
     
     #initialize the K0=dirac_delta(ell,ell') (initial condition for the ODE)

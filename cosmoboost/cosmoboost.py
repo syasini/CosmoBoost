@@ -10,7 +10,6 @@ np.set_printoptions(precision=7)
 
 
 # In[2]:
-
 COSMOBOOST_DIR = os.path.dirname(os.path.realpath(__file__)) #os.getcwd()
 
 sys.path.insert(0,COSMOBOOST_DIR)
@@ -220,13 +219,13 @@ class Kernel(object):
     
     def nu_mlpl(self,nu):
         print ("d={}".format(self.d))
-        K_d_arr = kr.get_K_d_arr(self,self.d,self.s)
+        K_d_arr = kr.calc_K_d_arr(self,self.d,self.s)
         if self.pars['normalize']==True:
             print ("normalized\n")
-            return kr.K_nu_d_norm(K_d_arr,nu,self.pars,freq_func=self.freq_func)
+            return kr.K_nu_d(K_d_arr,nu,self.pars,freq_func=self.freq_func,return_normalize=True)
         else:
             print ("not normalized\n")
-            return kr.K_nu_d(K_d_arr,nu,self.pars,freq_func=self.freq_func)
+            return kr.K_nu_d(K_d_arr,nu,self.pars,freq_func=self.freq_func,return_normalize=False)
         
         
     def d_arrary(self):
@@ -246,7 +245,7 @@ class Kernel(object):
         K_mlpl = self.mlpl
         K_lpl = np.zeros((self.lmax+1,2*self.delta_ell+1))
         
-        for lp in xrange(self.lmax+1):
+        for lp in range(self.lmax+1):
             M = np.arange(self.lmin,lp+1)
         #K_delta[lp]=2*np.sum(K_mlp[fh.linenumb_mlp_vec(M,lp,lmax=lmax)])-K_mlp[fh.linenumb_mlp_vec(0,lp,lmax=lmax)]
             K_lpl[lp,:]=2*np.sum(K_mlpl[mh.mlp2indx(M,lp,self.lmax),:]**2,axis=0)-K_mlpl[mh.mlp2indx(0,lp,self.lmax),:]**2
@@ -268,7 +267,7 @@ def deboost_alm(alm,kernel,*nu):
     #if len(alm.shape[1])!=kernel.mlpl.shape[0]:
     #    raise ValueError("the shape of alm vector and the kernel matrix doesn't match")
     
-    if (np.ndim(alm)!=1 & (alm.shape[0]) not in (1,3)):
+    if (np.ndim(alm)!=1 & (alm.shape[0] not in (1,3)) ):
         raise ValueError("alm should be either 1 dimensional (T) or 3 dimentional (T, E, B)")
 
     if np.ndim(alm) == 1:
@@ -397,7 +396,7 @@ def _deboost_almEB(almE,almB,kernel,*nu):
 def boost_Cl(Cl,kernel):
     lmax = kernel.lmax
     delta_ell = kernel.delta_ell
-    extention = (delta_ell*(2*lmax+1)+delta_ell**2)/2
+    extention = (delta_ell*(2*lmax+1)+delta_ell**2)//2
     
     Cl_ext = np.append(Cl,np.zeros(extention))
     
