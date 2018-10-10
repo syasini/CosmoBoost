@@ -97,11 +97,11 @@ class Kernel(object):
 
     def _init_matrices(self):
         if fh.file_exists(self.matrices_filename) and self.overwrite==False:
-            print "matrices loaded from file: "+ self.matrices_filename
+            print ("matrices loaded from file: "+ self.matrices_filename)
             self._load_matrices()
         else:
         
-            print "Calculating the index matrices..."
+            print ("Calculating the index matrices...")
             self.Mmatrix, self.Lmatrix = mh.ML_matrix(self.delta_ell,self.lmax)
             _,Clms = mh.Blm_Clm(delta_ell=self.delta_ell, lmax=self.lmax,s=self.s)
             self.Cmatrix = Clms[self.Lmatrix,self.Mmatrix]
@@ -114,10 +114,10 @@ class Kernel(object):
                 os.makedirs(dir_name)
                 fh.save_matrices(self.matrices_filename,self.Mmatrix,'M')
                 fh.save_matrices(self.matrices_filename,self.Lmatrix,'L')
-                print "Matrices saved in: " + self.matrices_filename
+                print ("Matrices saved in: " + self.matrices_filename)
 
         
-                print "Done!"
+                print ("Done!")
     
     def _init_mlpl(self):
     
@@ -129,14 +129,14 @@ class Kernel(object):
         self._lpl    = self._get_lpl()
     def _load_matrices(self):
         
-        print "loading the index matrices..."
+        print ("loading the index matrices...")
         self.Mmatrix = fh.load_matrix(self.matrices_filename,key="M")
         self.Lmatrix = fh.load_matrix(self.matrices_filename,key="L")
         #self.Lpmatrix = fh.load_matrix(self.matrices_filename,key="Lp")
         _,Clms = mh.Blm_Clm(delta_ell=self.delta_ell, lmax=self.lmax,s=self.s)
         self.Cmatrix = Clms[self.Lmatrix,self.Mmatrix]
         self.Smatrix = mh.S_matrix(self.Lmatrix,self.Mmatrix,self.s)
-        print "Done!"
+        print("Done!")
         
 
 
@@ -197,10 +197,10 @@ class Kernel(object):
         #load the aberration kernel if it exists,
         #otherwise calculate it by solving the kernel_ODE
         if fh.file_exists(self.kernel_filename) and self.overwrite==False:
-            print "Kernel loaded from file: "+ self.kernel_filename
+            print("Kernel loaded from file: "+ self.kernel_filename)
             K_mlpl = fh.load_kernel(self.kernel_filename,key='D1')
         else: 
-            print "solving kernel ODE for d=1"
+            print ("solving kernel ODE for d=1")
             K_mlpl = KernelODE.solve_K_T_ODE(self.pars,save_kernel=self.save_kernel)
         
         
@@ -211,21 +211,21 @@ class Kernel(object):
         if the kernel has been calculated before, it will be loaded
         otherwise it will be calculated using the ODE'''
         if fh.file_exists(self.kernel_filename) and self.overwrite==False:
-            print "Kernel loaded from file: "+ self.kernel_filename
+            print ("Kernel loaded from file: "+ self.kernel_filename)
         else:
-            print "solving kernel ODE for d=1"
+            print ("solving kernel ODE for d=1")
             self._get_mlpl_d1()
         
         return kr.K_d(self,self.d,self.s)
     
     def nu_mlpl(self,nu):
-        print "d={}".format(self.d)
+        print ("d={}".format(self.d))
         K_d_arr = kr.get_K_d_arr(self,self.d,self.s)
         if self.pars['normalize']==True:
-            print "normalized\n"
+            print ("normalized\n")
             return kr.K_nu_d_norm(K_d_arr,nu,self.pars,freq_func=self.freq_func)
         else:
-            print "not normalized\n"
+            print ("not normalized\n")
             return kr.K_nu_d(K_d_arr,nu,self.pars,freq_func=self.freq_func)
         
         
@@ -234,7 +234,7 @@ class Kernel(object):
         height, width = ((self.lmax + 1) * (self.lmax + 2) / 2, 2 * self.delta_ell + 1)
         K_d_arr = np.zeros((self.beta_exp_order + 1, height, width))
         for i in range(self.d, self.d - self.beta_exp_order - 1, -1):
-            print "d, i = {},{}".format(self.d, i)
+            print ("d, i = {},{}".format(self.d, i))
             K_d_arr[kr.d2indx(self.d, i)] = kr.K_d(self, i, self.s)
 
         return K_d_arr
@@ -272,7 +272,7 @@ def deboost_alm(alm,kernel,*nu):
         raise ValueError("alm should be either 1 dimensional (T) or 3 dimentional (T, E, B)")
 
     if np.ndim(alm) == 1:
-        print "adding new axis to alm...\n"
+        print ("adding new axis to alm...\n")
         alm = alm[None,:]
     #slice the temperature alm
     almT = alm[0]
@@ -282,7 +282,7 @@ def deboost_alm(alm,kernel,*nu):
     
     #set the first column to boosted almT
     if nu:
-        print "boosting T with nu = {}".format(nu)
+        print ("boosting T with nu = {}".format(nu))
         boosted_alm[0] = _deboost_almT(almT,kernel,nu[0])
     else:
         boosted_alm[0] = _deboost_almT(almT, kernel)
@@ -300,7 +300,7 @@ def deboost_alm(alm,kernel,*nu):
         boosted_almB = np.zeros(almB.shape)
 
         if nu:
-            print "boosting EB with nu = {}".format(nu)
+            print ("boosting EB with nu = {}".format(nu))
             boosted_alm[1:3] = _deboost_almEB(almE,almB,kernel,nu[0])
         else:
             boosted_alm[1:3] = _deboost_almEB(almE, almB, kernel)
@@ -316,7 +316,7 @@ def _deboost_almT(almT,kernel,*nu):
     '''deboost temperature multipoles almT (s=0)'''
     
 
-    print "deboosting almT\n"
+    print ("deboosting almT\n")
     #if (almT.shape[0]!=1) : raise ValueError('almT.shape!=1')
     if (kernel.s !=0):
         kernel.s=0
@@ -333,13 +333,13 @@ def _deboost_almT(almT,kernel,*nu):
     Mmatrix = kernel.Mmatrix
     Lmatrix = kernel.Lmatrix
     
-    print almT.shape
-    print almT[mh.mlp2indx(Mmatrix,Lmatrix,lmax)].shape
+    #print almT.shape
+    #print almT[mh.mlp2indx(Mmatrix,Lmatrix,lmax)].shape
 
     if nu:
         kernel.d = 3
         kernel.update()
-        print "\n boosting with nu={}\n\n".format(nu[0])
+        print ("\n boosting with nu={}\n\n".format(nu[0]))
         alm_boosted = np.sum(kernel.nu_mlpl(nu[0])*almT[mh.mlp2indx(Mmatrix,Lmatrix,lmax)],axis=1 )
     else:
         alm_boosted = np.sum(kernel.mlpl * almT[mh.mlp2indx(Mmatrix, Lmatrix, lmax)], axis=1)
@@ -350,7 +350,7 @@ def _deboost_almT(almT,kernel,*nu):
 def _deboost_almEB(almE,almB,kernel,*nu):
     '''deboost polarization multipoles almE and almB (s=2)'''
 
-    print "deboosting almEB\n"
+    print ("deboosting almEB\n")
     #if (almE.shape[0]!=1) : raise ValueError('almT.shape!=1')
     if (kernel.s !=2):
         kernel.s=2

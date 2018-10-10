@@ -141,7 +141,7 @@ def save_kernel(kernel_file_name, kernel, key='D1', overwrite=False):
     file_exists = os.path.isfile(str(kernel_file_name))
     if (not file_exists or overwrite==True):
         #initialize the fits file if it doesn't already exist
-        print "initializing fits file for the kernel...\n"
+        print ("initializing fits file for the kernel...\n")
         init_kernel_fits(kernel_file_name)
     
     #open the file in update mode and write the kernel in the appropriate HDU, then close it
@@ -158,7 +158,7 @@ def save_matrices(matrices_file_name, matrix, key='M',overwrite=False):
     file_exists = os.path.isfile(str(matrices_file_name))
     if (not file_exists or overwrite==True):
         #initialize the fits file if it doesn't already exist
-        print "initializing fits file for the matrices...\n"
+        print ("initializing fits file for the matrices...\n")
         init_matrices_fits(matrices_file_name)
     
     #open the file in update mode and write the matrix in the appropriate HDU, then close it
@@ -190,7 +190,7 @@ def load_kernel(kernel_file_name, key='D1'):
     
     #raise error if the file does not exist
     except IOError:
-        print str(kernel_file_name)+" does not exist."
+        print (str(kernel_file_name)+" does not exist.")
 
 def load_matrix(matrices_file_name, key='M'):
     '''loads the matrix chosen by 'key' from fits file'''
@@ -207,7 +207,7 @@ def load_matrix(matrices_file_name, key='M'):
     
     #raise error if the file does not exist
     except IOError:
-        print str(matrices_file_name)+" does not exist."
+        print (str(matrices_file_name)+" does not exist.")
 
 
 

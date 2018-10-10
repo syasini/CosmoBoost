@@ -1,4 +1,5 @@
 import os
+
 import numpy as np
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -91,7 +92,7 @@ def solve_K_T_ODE(pars,save_kernel=True,rtol=1.e-6,atol=1.e-6,mxstep=0):
     '''
         
     start = timer()
-    print "calculating the Doppler and aberration Kernel elements..."
+    print ("calculating the Doppler and aberration Kernel elements...")
     
     beta = pars['beta']
     s = pars['s']
@@ -158,7 +159,7 @@ def solve_K_T_ODE(pars,save_kernel=True,rtol=1.e-6,atol=1.e-6,mxstep=0):
     # the index (N-1) will give the final result
     eta = np.linspace(0,np.arctanh(beta),N)
 
-    print "eta values : ", eta
+    print ("eta values : ", eta)
  
     
 
@@ -179,7 +180,7 @@ def solve_K_T_ODE(pars,save_kernel=True,rtol=1.e-6,atol=1.e-6,mxstep=0):
     end = timer()
     t1= end - start
 
-    print "calculation time =", t1
+    print ("calculation time =", t1)
     
     if save_kernel: 
         
@@ -201,7 +202,7 @@ def solve_K_T_ODE(pars,save_kernel=True,rtol=1.e-6,atol=1.e-6,mxstep=0):
         #np.save(C_filename,Blms)
         
 
-        print "Kernel saved in: " + kernel_file_name
+        print ("Kernel saved in: " + kernel_file_name)
         #print "Matrices saved in: " + kernel_file_name
     
     
