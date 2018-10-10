@@ -219,16 +219,25 @@ class Kernel(object):
         return kr.K_d(self,self.d,self.s)
     
     def nu_mlpl(self,nu):
-        
+        print "d={}".format(self.d)
         K_d_arr = kr.get_K_d_arr(self,self.d,self.s)
         if self.pars['normalize']==True:
+            print "normalized\n"
             return kr.K_nu_d_norm(K_d_arr,nu,self.pars,freq_func=self.freq_func)
         else:
+            print "not normalized\n"
             return kr.K_nu_d(K_d_arr,nu,self.pars,freq_func=self.freq_func)
         
         
     def d_arrary(self):
-        return kr.get_K_d_arr(self,self.d)
+        #return kr.get_K_d_arr(self,self.d,self.s)
+        height, width = ((self.lmax + 1) * (self.lmax + 2) / 2, 2 * self.delta_ell + 1)
+        K_d_arr = np.zeros((self.beta_exp_order + 1, height, width))
+        for i in range(self.d, self.d - self.beta_exp_order - 1, -1):
+            print "d, i = {},{}".format(self.d, i)
+            K_d_arr[kr.d2indx(self.d, i)] = kr.K_d(self, i, self.s)
+
+        return K_d_arr
     
     
         
@@ -261,8 +270,10 @@ def deboost_alm(alm,kernel,*nu):
     
     if (np.ndim(alm)!=1 & (alm.shape[0]) not in (1,3)):
         raise ValueError("alm should be either 1 dimensional (T) or 3 dimentional (T, E, B)")
-    
-    
+
+    if np.ndim(alm) == 1:
+        print "adding new axis to alm...\n"
+        alm = alm[None,:]
     #slice the temperature alm
     almT = alm[0]
     
@@ -271,6 +282,7 @@ def deboost_alm(alm,kernel,*nu):
     
     #set the first column to boosted almT
     if nu:
+        print "boosting T with nu = {}".format(nu)
         boosted_alm[0] = _deboost_almT(almT,kernel,nu[0])
     else:
         boosted_alm[0] = _deboost_almT(almT, kernel)
@@ -280,7 +292,7 @@ def deboost_alm(alm,kernel,*nu):
     
     #return boosted E and B as well, if alm is 3 dim
     if alm.shape[0] == 3:
-    
+
         almE = alm[1]
         almB = alm[2]
         
@@ -288,6 +300,7 @@ def deboost_alm(alm,kernel,*nu):
         boosted_almB = np.zeros(almB.shape)
 
         if nu:
+            print "boosting EB with nu = {}".format(nu)
             boosted_alm[1:3] = _deboost_almEB(almE,almB,kernel,nu[0])
         else:
             boosted_alm[1:3] = _deboost_almEB(almE, almB, kernel)
@@ -324,6 +337,8 @@ def _deboost_almT(almT,kernel,*nu):
     print almT[mh.mlp2indx(Mmatrix,Lmatrix,lmax)].shape
 
     if nu:
+        kernel.d = 3
+        kernel.update()
         print "\n boosting with nu={}\n\n".format(nu[0])
         alm_boosted = np.sum(kernel.nu_mlpl(nu[0])*almT[mh.mlp2indx(Mmatrix,Lmatrix,lmax)],axis=1 )
     else:
