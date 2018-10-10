@@ -1,7 +1,7 @@
 import os
 import sys
 import numpy as np
-from cosmoboost import COSMOBOOST_DIR
+from cosmoboost.cosmoboost import COSMOBOOST_DIR
 
 sys.path.insert(0,COSMOBOOST_DIR+'/code')
 
@@ -55,8 +55,8 @@ def ML_matrix(delta_ell,lmax,lmin=0):
     Lpmatrix = np.array([])
     
     
-    Mmatrix = np.concatenate([m*np.ones(lmax+1-max(lmin,m)) for m in  xrange(0,lmax+1)])
-    Lpmatrix = np.concatenate([np.arange(max(lmin,m),lmax+1) for m in  xrange(0,lmax+1)])
+    Mmatrix = np.concatenate([m*np.ones(lmax+1-max(lmin,m)) for m in  range(0,lmax+1)])
+    Lpmatrix = np.concatenate([np.arange(max(lmin,m),lmax+1) for m in  range(0,lmax+1)])
     
         
     Mmatrix = np.tensordot(Mmatrix,np.ones(width),axes=0)
@@ -77,8 +77,8 @@ def MLpL_matrix(delta_ell,lmax,lmin=0):
     Lpmatrix = np.array([])
     
     
-    Mmatrix = np.concatenate([m*np.ones(lmax+1-max(lmin,m)) for m in  xrange(0,lmax+1)])
-    Lpmatrix = np.concatenate([np.arange(max(lmin,m),lmax+1) for m in  xrange(0,lmax+1)])
+    Mmatrix = np.concatenate([m*np.ones(lmax+1-max(lmin,m)) for m in  range(0,lmax+1)])
+    Lpmatrix = np.concatenate([np.arange(max(lmin,m),lmax+1) for m in  range(0,lmax+1)])
     
         
     Mmatrix = np.tensordot(Mmatrix,np.ones(width),axes=0)
@@ -100,9 +100,10 @@ def S_matrix(Lmatrix,Mmatrix,s=0):
 def minus_one_LplusLp(delta_ell,lmax):
     '''calculates (-1)**(l+lp)'''
  
-    height, width = ((lmax+1)*(lmax+2)/2,2*delta_ell+1)
-    
-    row = (-1)**np.arange(1,width+1)
+    height, width = ((lmax+1)*(lmax+2)//2,2*delta_ell+1)
+
+    parity = delta_ell%2
+    row = (-1)**np.arange(parity,width+parity)
     minus_one = np.tensordot(np.ones(height),row,axes=0)
     
     return minus_one
@@ -112,7 +113,7 @@ def transpose(kernel,delta_ell):
     '''calculates the transpose kernel (K_mllp)'''
     
     inv = np.zeros(kernel.shape)
-    for i in xrange(2*delta_ell+1):
+    for i in range(2*delta_ell+1):
         inv[:,i] = shift(kernel[:,2*delta_ell-i],i-delta_ell)
     
     return inv
@@ -124,12 +125,12 @@ def transpose(kernel,delta_ell):
 
 
 def mlp2indx(m,lp,lmax,lmin=0):
-    return m*(2*(lmax)+1-m)/2+lp
+    return m*(2*(lmax)+1-m)//2+lp
 
 
 def getindxminmax(m,l,lmin,lmax):
     if m <= lmin : return l + (1+lmax)*m-lmin*(1+m)
-    else: return (2*l-(1+lmin)*lmin+(2*lmax-m+1)*(m))/2
+    else: return (2*l-(1+lmin)*lmin+(2*lmax-m+1)*(m))//2
 
 def bin_array(array,bin_size):
     binned_array = array[:(array.size // bin_size) * bin_size].reshape(-1, bin_size).mean(axis=1)
