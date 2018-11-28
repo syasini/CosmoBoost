@@ -14,6 +14,7 @@ from cosmoboost import COSMOBOOST_DIR
 
 
 
+
 #######################################################
 #             file and directory names
 #######################################################
@@ -21,7 +22,8 @@ from cosmoboost import COSMOBOOST_DIR
 
 def dirname(beta,lmax):
     '''returns the local directory address where the fits file should be saved'''
-    return  COSMOBOOST_DIR+"/data/beta_"+str(beta)+"/lmax_"+str(lmax)
+    dirname = os.path.join(COSMOBOOST_DIR,"kernel","beta_"+str(beta)+"/lmax_"+str(lmax))
+    return  dirname #COSMOBOOST_DIR+"/data/beta_"+str(beta)+"/lmax_"+str(lmax)
 
 
 def kernel_filename(pars):
