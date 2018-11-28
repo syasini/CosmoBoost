@@ -5,7 +5,9 @@
 
 import sys
 import os
-import numpy as np 
+import numpy as np
+import pdb
+
 np.set_printoptions(precision=7) 
 
 
@@ -266,8 +268,8 @@ def deboost_alm(alm,kernel,*nu):
     
     #if len(alm.shape[1])!=kernel.mlpl.shape[0]:
     #    raise ValueError("the shape of alm vector and the kernel matrix doesn't match")
-    
-    if (np.ndim(alm)!=1 & (alm.shape[0] not in (1,3)) ):
+    #pdb.set_trace()
+    if (np.ndim(alm)!=1  and (alm.shape[0] not in (1,3)) ):
         raise ValueError("alm should be either 1 dimensional (T) or 3 dimentional (T, E, B)")
 
     if np.ndim(alm) == 1:

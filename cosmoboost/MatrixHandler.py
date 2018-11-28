@@ -1,9 +1,9 @@
 import os
 import sys
 import numpy as np
-from cosmoboost.cosmoboost import COSMOBOOST_DIR
+#from cosmoboost.cosmoboost import COSMOBOOST_DIR
 
-sys.path.insert(0,COSMOBOOST_DIR+'/code')
+#sys.path.insert(0,COSMOBOOST_DIR+'/code')
 
 import FileHandler as fh
 

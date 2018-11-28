@@ -1,2 +1,2 @@
-from cosmoboost import *
+#from . import cosmoboost
 
