@@ -9,7 +9,7 @@ import numpy as np
 from astropy.io import fits
 import os
 
-from cosmoboost import COSMOBOOST_DIR
+from cosmoboost.cosmoboost import COSMOBOOST_DIR
 
 
 
