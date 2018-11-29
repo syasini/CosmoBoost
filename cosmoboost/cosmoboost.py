@@ -8,7 +8,7 @@ import os
 import numpy as np
 import pdb
 
-np.set_printoptions(precision=7) 
+np.set_printoptions(precision=4)
 
 
 # In[2]:
