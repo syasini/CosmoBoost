@@ -33,3 +33,18 @@ def F11_nu(nu,T):
     F11 = -3*F + nu*derivative(F_nu,nu,args=(T,))
     return F11
 
+
+@np.vectorize
+def F_tSZ(nu, T=T_0, normalized=True):
+    '''calculate the frequency function of tSZ Intensity (tau*theta effect) at frequency nu (GHz)
+    Default setting returns the frequency function normalized by the differential blackbody
+    spectrum '''
+    x = 0.0479924 * nu / T
+    theta_e = 5. / 500.
+    f = x / np.tanh(x / 2.) - 4.
+
+    if normalized:
+        return f
+    else:
+        F = F_nu(nu, T, normalized=False) * f
+        return F
