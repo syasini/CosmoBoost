@@ -1,48 +1,25 @@
-import os
 
+__author__ = "Siavash Yasini"
+__email__ = "yasini@usc.edu"
+
+import os
 import numpy as np
 np.seterr(divide='ignore', invalid='ignore')
 
 from scipy.integrate import odeint
 from timeit import default_timer as timer
 from contextlib import contextmanager
-import FileHandler as fh
-import MatrixHandler as mh
+from lib import FileHandler as fh
+from lib import MatrixHandler as mh
+from lib.mytimer import timeit
 
+#number of steps for solving the Differential Equation
 N = 2
-
-@contextmanager
-def timeit():
-    '''Time the code in mins'''
-    t0 = timer()
-
-    yield
-
-    t1 = timer()
-
-    t = t1-t0
-
-    print("Done in {:.1f} min.".format(t/60))
-
 
 def dK_deta(Kstore,eta,Bmatrix):
     '''The derivative of the Kernel for index m and lp'''
-    #set index m to the predefined value M
-    #m = M
-    
-    #L = np.arange(ellp-delta_ell,ellp+delta_ell+1)
-    #L = L[L>=0]
-    #L = L[L<=l_max-1]
-    #print L
-    #define the derivative according to the ODE (eq. 44 in Dai, Chluba 2014)
-    
-    #for l in L:
-    #Kp_ellp[l] = + (0.0,Blm[l+1,m]*K_ellp[l+1])[l<l_max] - (0.0,Blm[l,m]*K_ellp[l-1])[l>0]
-    #    if l == 0: Kp_ellp[0] = Blm[1,m]*K_ellp[1]
-    #    elif l == l_max-1: Kp_ellp[l_max-1] = -Blm[l_max-1,m]*K_ellp[l_max-2]
-    #    else: Kp_ellp[l] = + Blm[l+1,m]*K_ellp[l+1] - Blm[l,m]*K_ellp[l-1]
     K_return = mh.shift_left(Bmatrix*Kstore) - Bmatrix*mh.shift_right(Kstore)
-    
+
     return K_return
 
 def dK_deta_loop(K_ellp,eta,m,ellp):
@@ -100,13 +77,9 @@ def solve_K_T_ODE(pars,save_kernel=True,rtol=1.e-6,atol=1.e-6,mxstep=0):
         scheme in the file_handler  . The rows correspond to different values of 
         ell for a neighborhood of delta_ell around ell'.
         
-    Example
-    -------
-    ????
     '''
-        
-    with timeit():
-        print ("calculating the Doppler and aberration Kernel elements...")
+
+    with timeit("calculating the Doppler and aberration Kernel elements"):
 
         beta = pars['beta']
         s = pars['s']
@@ -149,7 +122,6 @@ def solve_K_T_ODE(pars,save_kernel=True,rtol=1.e-6,atol=1.e-6,mxstep=0):
 
         #construct the Bmatrix corresponding to the elements of K0
 
-
         Blms,_ = mh.Blm_Clm(delta_ell,lmax,s=s)
         #Clms = np.true_divide(Blms,1)
         Bmatrix = Blms[Lmatrix,Mmatrix]
@@ -167,8 +139,6 @@ def solve_K_T_ODE(pars,save_kernel=True,rtol=1.e-6,atol=1.e-6,mxstep=0):
         Bmatrix = Bmatrix.reshape((width+2)*height)
 
 
-
-
         # initialize the eta = np.arctanh(beta) array for ODE iterations
         # the index (N-1) will give the final result
         eta = np.linspace(0,np.arctanh(beta),N)
@@ -176,15 +146,10 @@ def solve_K_T_ODE(pars,save_kernel=True,rtol=1.e-6,atol=1.e-6,mxstep=0):
         print ("eta values : ", eta)
 
 
-
-
         #solve the ODE for a range of ell'  between lmin and lmax
         #the derivative of the aberration kernel with respect to eta is defined in Kernel_recursive.py
-        #start_ode = timer()
         sol = odeint(dK_deta,K0,eta,args=(Bmatrix,),rtol=rtol,atol=atol,mxstep=mxstep,printmessg=True)
 
-        #end_ode = timer()
-        #print "ode: ", end_ode-start_ode
         #store the results in the K_T matrix
         K_T = sol[N-1].reshape(height,width+2)
 
