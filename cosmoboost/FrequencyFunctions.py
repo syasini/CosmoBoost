@@ -25,13 +25,13 @@ def F_nu(nu,T):
     return F
 
 #Doppler derivative of the differential blackbody spectrum (defined in arXiv 1610.00015)
-def F11_nu(nu,T):
-    '''calculate the differential BB spectrum (11) (MJy/sr) with a temperature T (K) at frequency nu (GHz) '''
-    x = 0.0479924*nu/T
-    f = x*np.exp(x)/(np.exp(x)-1)
-    F = B_nu(nu,T)*f
-    F11 = -3*F + nu*derivative(F_nu,nu,args=(T,))
-    return F11
+#def F11_nu(nu,T):
+#    '''calculate the differential BB spectrum (11) (MJy/sr) with a temperature T (K) at frequency nu (GHz) '''
+#    x = 0.0479924*nu/T
+#    f = x*np.exp(x)/(np.exp(x)-1)
+#    F = B_nu(nu,T)*f
+#    F11 = -3*F + nu*derivative(F_nu,nu,args=(T,))
+#    return F11
 
 
 @np.vectorize
