@@ -10,7 +10,7 @@ from astropy.io import fits
 import os
 
 #from cosmoboost.cosmoboost import COSMOBOOST_DIR
-#from cosmoboost import COSMOBOOST_DIR
+from cosmoboost import COSMOBOOST_DIR
 
 
 #######################################################
@@ -20,7 +20,7 @@ import os
 
 def dirname(beta,lmax):
     '''returns the local directory address where the fits file should be saved'''
-    dirname = os.path.join("..","kernel","beta_"+str(beta)+"/lmax_"+str(lmax))
+    dirname = os.path.join(COSMOBOOST_DIR,"kernel","beta_"+str(beta)+"/lmax_"+str(lmax))
     return  dirname #COSMOBOOST_DIR+"/data/beta_"+str(beta)+"/lmax_"+str(lmax)
 
 
@@ -194,6 +194,8 @@ def load_kernel(kernel_file_name, key='D1'):
 
 def load_matrix(matrices_file_name, key='M'):
     '''loads the matrix chosen by 'key' from fits file'''
+
+
 
     # if the file exists, open it and read the HDU chosen by 'key'
     try:

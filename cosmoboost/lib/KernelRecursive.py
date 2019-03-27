@@ -8,9 +8,9 @@
 
 
 import numpy as np
-import FileHandler as fh
-import FrequencyFunctions as ff
-import MatrixHandler as mh
+from . import FileHandler as fh
+from . import FrequencyFunctions as ff
+from . import MatrixHandler as mh
 from scipy.misc import derivative, factorial, comb
 from scipy.special import sph_harm as Ylm
 from scipy.integrate import quad
@@ -98,6 +98,7 @@ def K_d(K,d,s):
 
 
 def d2indx(d,i):
+    """convert the Doppler weight of the kernel to the index of the array"""
     return d-i
 
 
