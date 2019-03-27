@@ -1,7 +1,7 @@
-
 # coding: utf-8
 
-# In[1]:
+__author__ = "Siavash Yasini"
+__email__ = "yasini@usc.edu"
 
 import sys
 import os
@@ -10,17 +10,18 @@ import pdb
 
 np.set_printoptions(precision=4)
 
+test_par = 21
 
-# In[2]:
-COSMOBOOST_DIR = os.path.dirname(os.path.realpath(__file__)) #os.getcwd()
+from cosmoboost import COSMOBOOST_DIR
+#COSMOBOOST_DIR = os.path.dirname(os.path.realpath(__file__)) #os.getcwd()
 
 sys.path.insert(0,COSMOBOOST_DIR)
 
-import FileHandler as fh
-import FrequencyFunctions as ff
-import MatrixHandler as mh
-import KernelODE 
-import KernelRecursive as kr
+from lib import FileHandler as fh
+from lib import FrequencyFunctions as ff
+from lib import MatrixHandler as mh
+from lib import KernelODE
+from lib import KernelRecursive as kr
 
 
 DEFAULT_PARS = {
@@ -33,16 +34,17 @@ DEFAULT_PARS = {
     'T_0':2.72548 ,#Kelvins
     'beta_exp_order':4, 
     'derivative_dnu':1.0,
-    'normalize': True
+    'normalize': True,
+    'frequency_function': "CMB"
 }
 
-
-# In[3]:
+FREQ_DICT = {
+    "CMB" : ff.F_nu,
+    "tSZ" : ff.F_tSZ,
+    }
 
 class Kernel(object):
-    
-    
-    
+    """Generalized Doppler and aberration Kernel class"""
     def __init__(self, pars=DEFAULT_PARS,
                  overwrite=False,save_kernel=True):
         
@@ -65,13 +67,12 @@ class Kernel(object):
         self.overwrite= overwrite
         self.save_kernel=save_kernel
 
-        
-        self.freq_func = ff.F_nu
-        
+        self.freq_func = FREQ_DICT[pars["frequency_function"]]
         self.update()
         
     def update(self):
-        
+        """update the parameters and evaluate the kernel elements"""
+
         self.pars = {
             'd' : self.d,
             's' : self.s,
@@ -88,8 +89,7 @@ class Kernel(object):
         
         self.kernel_filename = fh.kernel_filename(self.pars)
         self.matrices_filename = fh.matrices_filename(self.pars)
-        
-        
+
         self._init_matrices()
         self._init_mlpl()
         
@@ -97,11 +97,16 @@ class Kernel(object):
         self.mlpl =[]
 
     def _init_matrices(self):
+        """initialize the kernel matrices"""
+
+        # check to see if the file exists
         if fh.file_exists(self.matrices_filename) and self.overwrite==False:
-            print ("matrices loaded from file: "+ self.matrices_filename)
+
+            print ("\nMatrices loaded from file: {} \n".format( self.matrices_filename))
             self._load_matrices()
+
         else:
-        
+
             print ("Calculating the index matrices...")
             self.Mmatrix, self.Lmatrix = mh.ML_matrix(self.delta_ell,self.lmax)
             _,Clms = mh.Blm_Clm(delta_ell=self.delta_ell, lmax=self.lmax,s=self.s)
@@ -115,10 +120,9 @@ class Kernel(object):
                 os.makedirs(dir_name)
                 fh.save_matrices(self.matrices_filename,self.Mmatrix,'M')
                 fh.save_matrices(self.matrices_filename,self.Lmatrix,'L')
-                print ("Matrices saved in: " + self.matrices_filename)
+                print ("\nMatrices saved in: {} \n".format(self.matrices_filename))
 
-        
-                print ("Done!")
+                print ("Done!\n")
     
     def _init_mlpl(self):
     
@@ -128,20 +132,18 @@ class Kernel(object):
         self._mlpl  = self._mlpl_d1 
         #self._mlpl = self.mlpl
         self._lpl    = self._get_lpl()
+
     def _load_matrices(self):
         
-        print ("loading the index matrices...")
+        print ("Loading the index matrices...")
         self.Mmatrix = fh.load_matrix(self.matrices_filename,key="M")
         self.Lmatrix = fh.load_matrix(self.matrices_filename,key="L")
         #self.Lpmatrix = fh.load_matrix(self.matrices_filename,key="Lp")
         _,Clms = mh.Blm_Clm(delta_ell=self.delta_ell, lmax=self.lmax,s=self.s)
         self.Cmatrix = Clms[self.Lmatrix,self.Mmatrix]
         self.Smatrix = mh.S_matrix(self.Lmatrix,self.Mmatrix,self.s)
-        print("Done!")
-        
+        print("Done!\n")
 
-
-    
     
     @property #mlpl getter
     def mlpl(self):
@@ -153,37 +155,28 @@ class Kernel(object):
     @mlpl.setter #mlpl setter
     def mlpl(self, value):
         if self.d == 1:
-            #print "set d=1 values for mlpl"
+            # set d=1 values for mlpl"
             self._mlpl = self._mlpl_d1
         else:
-            #print "set d>1 values for mlpl"
+            # set d>1 values for mlpl"
             self._mlpl = self._get_mlpl()
 
             
     @property #mlpl getter
     def lpl(self):
         
-        #print "get values for mlpl"
+        # get values for mlpl"
         return self._get_lpl()
         
             
     @lpl.setter #mlpl setter
     def lpl(self, value):
         if self.d == 1:
-            #print "set d=1 values for mlpl"
+            #set d=1 values for mlpl"
             self._lpl = self._get_lpl()
         else:
-            #print "set d>1 values for mlpl"
+            #set d>1 values for mlpl"
             self._lpl = self._get_lpl()
-#    @property #pars getter
-#    def pars(self):
-        
-#        print "get values for mlpl"
-#        return self._pars
-    
-    
-#    @pars.setter #mlpl setter
-#    def pars(self, value):
 
 
 
@@ -198,10 +191,10 @@ class Kernel(object):
         #load the aberration kernel if it exists,
         #otherwise calculate it by solving the kernel_ODE
         if fh.file_exists(self.kernel_filename) and self.overwrite==False:
-            print("Kernel loaded from file: "+ self.kernel_filename)
+            print("Kernel loaded from file: {}".format(self.kernel_filename))
             K_mlpl = fh.load_kernel(self.kernel_filename,key='D1')
         else: 
-            print ("solving kernel ODE for d=1")
+            print ("Solving kernel ODE for d=1")
             K_mlpl = KernelODE.solve_K_T_ODE(self.pars,save_kernel=self.save_kernel)
         
         
@@ -214,7 +207,7 @@ class Kernel(object):
         if fh.file_exists(self.kernel_filename) and self.overwrite==False:
             print ("Kernel loaded from file: "+ self.kernel_filename)
         else:
-            print ("solving kernel ODE for d=1")
+            print ("Solving kernel ODE for d=1")
             self._get_mlpl_d1()
         
         return kr.K_d(self,self.d,self.s)
@@ -222,14 +215,15 @@ class Kernel(object):
     def nu_mlpl(self,nu):
         print ("d={}".format(self.d))
         K_d_arr = kr.calc_K_d_arr(self,self.d,self.s)
+
         if self.pars['normalize']==True:
             print ("normalized\n")
-            return kr.K_nu_d(K_d_arr,nu,self.pars,freq_func=self.freq_func,return_normalize=True)
         else:
             print ("not normalized\n")
-            return kr.K_nu_d(K_d_arr,nu,self.pars,freq_func=self.freq_func,return_normalize=False)
-        
-        
+
+        return kr.K_nu_d(K_d_arr,nu,self.pars,freq_func=self.freq_func,
+                             return_normalize=self.pars['normalize'])
+
     def d_arrary(self):
         #return kr.get_K_d_arr(self,self.d,self.s)
         height, width = ((self.lmax + 1) * (self.lmax + 2) / 2, 2 * self.delta_ell + 1)
@@ -243,7 +237,8 @@ class Kernel(object):
     
         
     def _get_lpl(self):
-        '''returns the Boost Power Transfer Matrix (BPTM) K_{lp,l} defined in ?'''
+        '''returns the Boost Power Transfer Matrix (BPTM) K_{lp,l} defined in Yasini &
+        Pierpeoli 2017'''
         K_mlpl = self.mlpl
         K_lpl = np.zeros((self.lmax+1,2*self.delta_ell+1))
         
@@ -262,13 +257,7 @@ def deboost_alm(alm,kernel,*nu):
     where n = 1 for T only
     and   n = 3 for (T,E,B)
     if frequency nu is provided, the generalized aberation kernel coefficients will be used'''
-    
-    #if not isinstance(kernel,Kernel):
-        #raise TypeError("the abberation kernel used is not an instance of the Kernel() class.") 
-    
-    #if len(alm.shape[1])!=kernel.mlpl.shape[0]:
-    #    raise ValueError("the shape of alm vector and the kernel matrix doesn't match")
-    #pdb.set_trace()
+
     if (np.ndim(alm)!=1  and (alm.shape[0] not in (1,3)) ):
         raise ValueError("alm should be either 1 dimensional (T) or 3 dimentional (T, E, B)")
 
@@ -297,8 +286,8 @@ def deboost_alm(alm,kernel,*nu):
         almE = alm[1]
         almB = alm[2]
         
-        boosted_almE = np.zeros(almE.shape)
-        boosted_almB = np.zeros(almB.shape)
+        #boosted_almE = np.zeros(almE.shape)
+        #boosted_almB = np.zeros(almB.shape)
 
         if nu:
             print ("boosting EB with nu = {}".format(nu))
@@ -379,8 +368,7 @@ def _deboost_almEB(almE,almB,kernel,*nu):
     #extend the alm
     almE = np.append(almE,np.zeros(extention))
     almB = np.append(almB,np.zeros(extention))
-    
-    
+
     
     Mmatrix = kernel.Mmatrix
     Lmatrix = kernel.Lmatrix
