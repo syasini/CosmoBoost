@@ -1,5 +1,8 @@
 
-__author__ = "Siavash Yasini"
+"""
+library including coefficient matrices for the ODE and recursive equations
+"""
+__author__ = " Siavash Yasini"
 __email__ = "yasini@usc.edu"
 
 import numpy as np

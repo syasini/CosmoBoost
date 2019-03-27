@@ -1,6 +1,9 @@
-
-__author__ = "Siavash Yasini"
+"""
+library including differential equation solver for d=1 kernel elements
+"""
+__author__ = " Siavash Yasini"
 __email__ = "yasini@usc.edu"
+
 
 import os
 import numpy as np

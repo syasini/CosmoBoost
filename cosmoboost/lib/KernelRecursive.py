@@ -1,11 +1,9 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
 """
-    Created on Sun Jul  2 17:03:33 2017
-    
-    @author: siavashyasini
-    """
+library including recursive equations for the Doppler and aberration kernel elements
+"""
 
+__author__ = " Siavash Yasini"
+__email__ = "yasini@usc.edu"
 
 import numpy as np
 from . import FileHandler as fh

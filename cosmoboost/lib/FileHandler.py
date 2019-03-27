@@ -1,9 +1,8 @@
-'''
-    *********************FileHandler.py***********************
-    includes functions for handling (saving/loading) fits files
-    
-    @author: siavashyasini
-    '''
+"""
+library including functions for handling (saving/loading) fits files
+"""
+__author__ = " Siavash Yasini"
+__email__ = "yasini@usc.edu"
 
 import numpy as np
 from astropy.io import fits
