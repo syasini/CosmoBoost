@@ -1,11 +1,8 @@
-import os
-import sys
+
+__author__ = "Siavash Yasini"
+__email__ = "yasini@usc.edu"
+
 import numpy as np
-#from cosmoboost.cosmoboost import COSMOBOOST_DIR
-
-#sys.path.insert(0,COSMOBOOST_DIR+'/code')
-
-#import FileHandler as fh
 
 
 
@@ -25,8 +22,8 @@ def Blm_Clm(delta_ell, lmax,s):
                                  
     #initialize an zero matrix Blm of size (lmax,mmax=lmax) 
     #undefined values (for example ell < m will return 0.)
-    Blm = np.zeros((lmax+1+delta_ell,lmax+1+delta_ell))
-    Clm = np.zeros((lmax+1+delta_ell,lmax+1+delta_ell))
+    #Blm = np.zeros((lmax+1+delta_ell,lmax+1+delta_ell))
+    #Clm = np.zeros((lmax+1+delta_ell,lmax+1+delta_ell))
     
     #eq. 23 in Dai, Chluba 2014 arXiv:1403.6117v2
     Blm = np.sqrt((L**2-s**2)*np.true_divide(L**2-M**2,4.0*L**2-1))
@@ -125,10 +122,12 @@ def transpose(kernel,delta_ell):
 
 
 def mlp2indx(m,lp,lmax,lmin=0):
+    '''convert mlp to column index'''
     return m*(2*(lmax)+1-m)//2+lp
 
 
 def getindxminmax(m,l,lmin,lmax):
+    '''find the min and max column indeces based on lmin and lmax '''
     if m <= lmin : return l + (1+lmax)*m-lmin*(1+m)
     else: return (2*l-(1+lmin)*lmin+(2*lmax-m+1)*(m))//2
 
