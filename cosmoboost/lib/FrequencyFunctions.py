@@ -17,12 +17,16 @@ def B_nu(nu,T):
     return 0.0014745 * nu**3 /(np.exp(0.0479924*nu/(T))-1)
 
 #differential blackbody spectrum 
-def F_nu(nu,T):
+def F_nu(nu,T,normalized=False):
     '''calculate the differential BB spectrum (MJy/sr) with a temperature T (K) at frequency nu (GHz) '''
     x = 0.0479924*nu/T
     f = x*np.exp(x)/(np.exp(x)-1)
     F = B_nu(nu,T)*f
-    return F
+
+    if normalized:
+        return f
+    else:
+        return F
 
 #Doppler derivative of the differential blackbody spectrum (defined in arXiv 1610.00015)
 #def F11_nu(nu,T):
@@ -40,10 +44,10 @@ def F_tSZ(nu, T, normalized=False):
     Default setting returns the frequency function normalized by the differential blackbody
     spectrum '''
     x = 0.0479924 * nu / T
-    f = x / np.tanh(x / 2.) - 4.
+    g = x / np.tanh(x / 2.) - 4.
 
     if normalized:
-        return f
+        return g
     else:
-        F = F_nu(nu, T ) * f
+        F = F_nu(nu, T ) * g
         return F
