@@ -27,7 +27,7 @@ from lib import KernelRecursive as kr
 DEFAULT_PARS = {
     'd' : 1,
     's' : 0,
-    'beta' : -0.00123,
+    'beta' : 0.00123,
     'lmin' : 0,
     'lmax' : 1000,
     'delta_ell' : 3,
@@ -252,8 +252,8 @@ class Kernel(object):
 
 
         
-def deboost_alm(alm,kernel,*nu):
-    ''' deboost alm with the shape (n,(lmax+1)*(lmax+2)/2)
+def boost_alm(alm,kernel,*nu):
+    ''' boost alm with the shape (n,(lmax+1)*(lmax+2)/2)
     where n = 1 for T only
     and   n = 3 for (T,E,B)
     if frequency nu is provided, the generalized aberation kernel coefficients will be used'''
@@ -273,9 +273,9 @@ def deboost_alm(alm,kernel,*nu):
     #set the first column to boosted almT
     if nu:
         print ("boosting T with nu = {}".format(nu))
-        boosted_alm[0] = _deboost_almT(almT,kernel,nu[0])
+        boosted_alm[0] = _boost_almT(almT,kernel,nu[0])
     else:
-        boosted_alm[0] = _deboost_almT(almT, kernel)
+        boosted_alm[0] = _boost_almT(almT, kernel)
     #return boosted T if alm is 1 dim
     if alm.shape[0] == 1:
         return boosted_alm[0]
@@ -291,9 +291,9 @@ def deboost_alm(alm,kernel,*nu):
 
         if nu:
             print ("boosting EB with nu = {}".format(nu))
-            boosted_alm[1:3] = _deboost_almEB(almE,almB,kernel,nu[0])
+            boosted_alm[1:3] = _boost_almEB(almE,almB,kernel,nu[0])
         else:
-            boosted_alm[1:3] = _deboost_almEB(almE, almB, kernel)
+            boosted_alm[1:3] = _boost_almEB(almE, almB, kernel)
         
     
 
@@ -302,11 +302,11 @@ def deboost_alm(alm,kernel,*nu):
 
 
 
-def _deboost_almT(almT,kernel,*nu):
-    '''deboost temperature multipoles almT (s=0)'''
+def _boost_almT(almT,kernel,*nu):
+    '''boost temperature multipoles almT (s=0)'''
     
 
-    print ("deboosting almT\n")
+    print ("boosting almT\n")
     #if (almT.shape[0]!=1) : raise ValueError('almT.shape!=1')
     if (kernel.s !=0):
         kernel.s=0
@@ -337,10 +337,10 @@ def _deboost_almT(almT,kernel,*nu):
     return alm_boosted
 
 
-def _deboost_almEB(almE,almB,kernel,*nu):
-    '''deboost polarization multipoles almE and almB (s=2)'''
+def _boost_almEB(almE,almB,kernel,*nu):
+    '''boost polarization multipoles almE and almB (s=2)'''
 
-    print ("deboosting almEB\n")
+    print ("boosting almEB\n")
     #if (almE.shape[0]!=1) : raise ValueError('almT.shape!=1')
     if (kernel.s !=2):
         kernel.s=2
