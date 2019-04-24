@@ -10,9 +10,9 @@ from . import FileHandler as fh
 from . import FrequencyFunctions as ff
 from . import MatrixHandler as mh
 from scipy.misc import derivative, factorial, comb
+
 from scipy.special import sph_harm as Ylm
 from scipy.integrate import quad
-
 sign_pref={0:"0",1:"+",-1:"-"}
 
 def _K_d_lift(K,d,s):
@@ -126,7 +126,7 @@ def calc_K_d_arr(K,d,s):
     return K_d_arr
 
 #FIXME: change derivative_dnu to dnu
-def K_nu_d(K_d_arr,nu,pars,freq_func=ff.F_nu,dmod="sp",return_normalize=True):
+def K_nu_d(K_d_arr,nu,pars,freq_func=None,return_normalize=True):
     
     #d = pars['d']
     beta_exp_order = pars['beta_exp_order']
@@ -143,7 +143,8 @@ def K_nu_d(K_d_arr,nu,pars,freq_func=ff.F_nu,dmod="sp",return_normalize=True):
             Klplm=K_d_arr[k]
             kfactor +=  Klplm *(-1.0)**(n+k) * comb(n,k)
         
-        Kernel += kfactor/factorial(n)*nu**n * derivative(freq_func,nu,dx =dx,
+        Kernel = Kernel + np.true_divide(kfactor,factorial(n))*nu**n * derivative(freq_func,nu,
+                                                                                 dx =dx,
                                                                    n=n,args=(T,),order=13) #
         # calculate the derivative with scipy
     
@@ -179,20 +180,23 @@ def K_nu_d(K_d_arr,nu,pars,freq_func=ff.F_nu,dmod="sp",return_normalize=True):
 #
 
 
-#============test functions==========
+########################################
+#          integration functions
+########################################
 
-def Kerd_intgrl_method(lp,l,m,d,beta,gamma):
+def Kerd_intgrl_method(lp,l,m,d,beta):
+    """calculate the kernel coefficient by direct integration"""
+
     gamma = 1.0/np.sqrt(1-beta**2)
-    func = lambda mup: np.conj(Ylm(m,lp,0,np.arccos(mup)))*\
-        Ylm(m,l,0,np.arccos((mup-beta)/(1-beta*mup)))/(gamma*(1-beta*mup))**d
+    func = lambda mup: np.conj(Ylm(m,lp,0,np.arccos(mup)))* \
+                       Ylm(m,l,0,np.arccos((mup-beta)/(1-beta*mup)))/(gamma*(1-beta*mup))**d
     return 2*np.pi*quad(func,-1,1)[0]
 
 
-
-def Ker_nu_d_intgrl_method(nup,lp,l,m,d):
-    beta = 0.001
+def Ker_nu_d_intgrl_method(lp, l, m, d, beta, nup, ff, T_0):
     gamma = 1.0/np.sqrt(1-beta**2)
-    func = lambda mup: np.conj(Ylm(m,lp,0,np.arccos(mup)))*\
-        Ylm(m,l,0,np.arccos((mup-beta)/(1-beta*mup)))/(gamma*(1-beta*mup))**d * F_nu(gamma*(1-beta*mup)*nup,T_0)
+    func = lambda mup: np.conj(Ylm(m,lp,0,np.arccos(mup)))* \
+                       Ylm(m,l,0,np.arccos((mup-beta)/(1-beta*mup)))/(gamma*(1-beta*mup))**d * ff(gamma*(
+            1-beta*mup)*nup,T_0,normalized=False)
     return 2*np.pi*quad(func,-1,1)[0]
 
