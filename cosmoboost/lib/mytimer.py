@@ -6,11 +6,11 @@ from contextlib import contextmanager
 
 @contextmanager
 def timeit(process_name="Process"):
-    '''Time the code in mins'''
+    """Time the code in mins"""
     import time
 
     time_stamp = time.strftime("%H:%M:%S %p")
-    print("{:=>50}\n{} started at {}\n".format("",process_name,time_stamp))
+    print("{:=>50}\n{} started at {}\n".format("", process_name, time_stamp))
     t_i = time.time()
 
     yield
@@ -19,4 +19,4 @@ def timeit(process_name="Process"):
 
     t = t_f-t_i
 
-    print("{} was done in {:.1f} min.\n{:=>50}\n".format(process_name, t/60,""))
+    print("\n{} was done in {:.1f} min.\n{:=>50}\n".format(process_name, t/60, ""))

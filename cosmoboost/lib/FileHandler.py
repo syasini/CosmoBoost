@@ -8,7 +8,9 @@ from astropy.io import fits
 import os
 
 from cosmoboost import COSMOBOOST_DIR
-
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 #######################################################
 #             file and directory names
 #######################################################
@@ -21,6 +23,7 @@ def dirname(beta, lmax):
 
 def get_kernel_filename(pars):
     """returns the name and address of the fits file based on values in pars dictionary"""
+
     pars['s'] = abs(pars['s'])
     
     kernel_fname = os.path.join(
@@ -37,7 +40,7 @@ def get_matrices_filename(pars):
 
     matrices_fname = os.path.join(
         dirname(pars['beta'], pars['lmax']),
-        "K_T_s_{s}_delta_{delta_ell}_lmax_{lmax}_beta_{beta}.fits".format(**pars)
+        "M_T_s_{s}_delta_{delta_ell}_lmax_{lmax}_beta_{beta}.fits".format(**pars)
         )
     return matrices_fname
      
@@ -122,7 +125,7 @@ def init_matrices_fits(matrices_file_name):
     #S_hdu = fits.ImageHDU(name="S")
     
     #hdus = [M_hdu,LP_hdu,L_hdu,CS0_hdu,CS2_hdu,S_hdu]
-    hdus = [M_hdu,L_hdu]
+    hdus = [M_hdu, L_hdu]
     
     #concatenate the HDUs into an HDUList and write to fits file
     hdulist = fits.HDUList(hdus)
@@ -140,7 +143,7 @@ def save_kernel(kernel_file_name, kernel, key='D1', overwrite=False):
     file_exists = os.path.isfile(str(kernel_file_name))
     if not file_exists or overwrite is True:
         # initialize the fits file if it doesn't already exist
-        print("initializing fits file for the kernel...\n")
+        print("\ninitializing fits file for the kernel...\n")
         init_kernel_fits(kernel_file_name)
     
     # open the file in update mode and write the kernel in the appropriate HDU, then close it
@@ -157,7 +160,7 @@ def save_matrices(matrices_file_name, matrix, key='M',overwrite=False):
     file_exists = os.path.isfile(str(matrices_file_name))
     if not file_exists or overwrite is True:
         # initialize the fits file if it doesn't already exist
-        print("initializing fits file for the matrices...\n")
+        print("\ninitializing fits file for the matrices...\n")
         init_matrices_fits(matrices_file_name)
     
     # open the file in update mode and write the matrix in the appropriate HDU, then close it
@@ -188,7 +191,7 @@ def load_kernel(kernel_file_name, key='D1'):
     
     # raise error if the file does not exist
     except IOError:
-        print("File does not exist:\n{}".format(kernel_file_name))
+        print("\nFile does not exist:\n{}".format(kernel_file_name))
 
 
 def load_matrix(matrices_file_name, key='M'):
@@ -204,7 +207,7 @@ def load_matrix(matrices_file_name, key='M'):
     
     # raise error if the file does not exist
     except IOError:
-        print("File does not exist:\n{}".format(matrices_file_name))
+        print("\nFile does not exist:\n{}".format(matrices_file_name))
 
 
 

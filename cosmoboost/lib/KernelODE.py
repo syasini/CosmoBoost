@@ -68,7 +68,7 @@ def solve_K_T_ODE(pars, save_kernel=True, rtol=1.e-6, atol=1.e-6, mxstep=0):
     save_kernel : bool, optional
         If True, the kernel elements will be saved to a file for later use
 
-    rtor, atol, mxstep: scalars
+    rtol, atol, mxstep: scalars
         passed to scipy.odeint to set precision
 
     Returns
@@ -127,7 +127,7 @@ def solve_K_T_ODE(pars, save_kernel=True, rtol=1.e-6, atol=1.e-6, mxstep=0):
 
 
         # construct the Bmatrix corresponding to the elements of K0
-        Blms, _ = mh.Blm_Clm(delta_ell, lmax, s=s)
+        Blms, _ = mh.get_Blm_Clm(delta_ell, lmax, s=s)
         Bmatrix = Blms[Lmatrix, Mmatrix]
         Bmatrix[np.isnan(Bmatrix)] = 0
 
@@ -154,8 +154,8 @@ def solve_K_T_ODE(pars, save_kernel=True, rtol=1.e-6, atol=1.e-6, mxstep=0):
         # the index (N-1) will give the final result
         eta = np.linspace(0, np.arctanh(beta), N)
 
-        print("eta values : ", eta)
-
+        print("beta (v/c) : ", beta)
+        print("eta (arctanh(beta) : ", eta[-1])
 
         # solve the ODE for a range of ell'  between lmin=0 and lmax
         # dK_deta is the derivative of the aberration kernel with respect to eta is defined
@@ -171,7 +171,6 @@ def solve_K_T_ODE(pars, save_kernel=True, rtol=1.e-6, atol=1.e-6, mxstep=0):
 
         # remove the zero padding from the final solution
         K_T = np.delete(K_T, [2*delta_ell+1,2*delta_ell+2],axis=1)
-
 
     # ------------------------------
     #         save to file
