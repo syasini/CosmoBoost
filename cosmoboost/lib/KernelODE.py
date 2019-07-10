@@ -14,6 +14,9 @@ from lib import FileHandler as fh
 from lib import MatrixHandler as mh
 from lib.mytimer import timeit
 
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 # number of steps for returntig the solution to the Differential Equation
 N = 2  # first and last
 
@@ -55,7 +58,7 @@ def dK_deta(Kstore, eta, Bmatrix):
 #     return Kp_ellp
 
 
-def solve_K_T_ODE(pars, save_kernel=True, rtol=1.e-6, atol=1.e-6, mxstep=0):
+def solve_K_T_ODE(pars, save_kernel=True, rtol=1.e-3, atol=1.e-6, mxstep=0):
     '''solves the ODE to find the temperature aberration kernel elements
     uses Eq. 44 in Dai, Chluba 2014 arXiv:1403.6117v2
     
@@ -79,7 +82,7 @@ def solve_K_T_ODE(pars, save_kernel=True, rtol=1.e-6, atol=1.e-6, mxstep=0):
         ell for a neighborhood of delta_ell around ell'.
         
     '''
-
+    logger.info("rtol = {}\natol = {}".format(rtol, atol))
     with timeit("calculating the Doppler and aberration Kernel elements"):
 
         # ------------------------------
@@ -123,7 +126,7 @@ def solve_K_T_ODE(pars, save_kernel=True, rtol=1.e-6, atol=1.e-6, mxstep=0):
             Mmatrix = fh.load_matrix(matrices_file_name,key='M')
             Lmatrix = fh.load_matrix(matrices_file_name,key='L')
         else:
-            Mmatrix,Lmatrix = mh.ML_matrix(delta_ell=delta_ell,lmax=lmax)
+            Mmatrix,Lmatrix = mh.get_ML_matrix(delta_ell=delta_ell,lmax=lmax)
 
 
         # construct the Bmatrix corresponding to the elements of K0
