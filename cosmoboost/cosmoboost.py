@@ -277,6 +277,25 @@ class Kernel(object):
         return K_lpl
 
     # TODO: add lpl_nu function for boosting Cl in intensity
+    def nu_lpl(self, nu):
+        """returns the Boost Power Transfer Matrix (BPTM) K_{lp,l} at frequency nu [GHz] defined in
+        Yasini & Pierpeoli 2017"""
+        K_nu_mlpl = self.nu_mlpl(nu)
+        K_nu_lpl = np.zeros((self.lmax + 1, 2 * self.delta_ell + 1))
+
+        for lp in range(self.lmax + 1):
+            # find all the m mode relevant for each ell'
+            M = np.arange(self.lmin, lp + 1)
+
+            # sum over all the m modes for each ell'
+            # m=0 has to be removed because it's counted twice
+            K_nu_lpl[lp, :] = 2 * np.sum(K_nu_mlpl[mh.mlp2indx(M, lp, self.lmax), :] ** 2, axis=0) \
+                           - K_nu_mlpl[mh.mlp2indx(0, lp, self.lmax), :] ** 2
+
+            K_nu_lpl[lp, :] /= 2 * lp + 1
+
+        return K_nu_lpl
+
 
 ##################################################
 #           boosting functions
@@ -325,10 +344,12 @@ def boost_alm(alm, kernel, *nu):
         print("boosting T with nu [GHz] = {}".format(nu))
         boosted_alm[0] = _boost_almT(almT, kernel, nu[0])
     else:
+        print("boosting T")
         boosted_alm[0] = _boost_almT(almT, kernel)
 
     # return boosted T if alm is 1 dim
     if alm.shape[0] == 1:
+        print("Done!")
         return boosted_alm[0]
 
     # return boosted E and B as well, if alm is 3 dim
@@ -341,8 +362,10 @@ def boost_alm(alm, kernel, *nu):
             print("boosting E & B with nu = {}".format(nu))
             boosted_alm[1:3] = _boost_almEB(almE, almB, kernel, nu[0])
         else:
+            print("boosting E & B")
             boosted_alm[1:3] = _boost_almEB(almE, almB, kernel)
 
+    print("Done!")
     return boosted_alm
 
 
@@ -426,7 +449,7 @@ def _boost_almEB(almE, almB, kernel, *nu):
 # ------------------------------
 #           C_ell
 # ------------------------------
-def boost_Cl(Cl, kernel):
+def boost_Cl(Cl, kernel, *nu):
     """
 
     boost alm using the provided Doppler & aberration kernel
@@ -453,8 +476,13 @@ def boost_Cl(Cl, kernel):
     Lp = np.arange(lmax+1, dtype=int)
     L = np.tensordot(Lp, np.ones(2 * delta_ell + 1, dtype=int), axes=0)\
                     + np.arange(-delta_ell, delta_ell+1, dtype=int)
-    
-    Cl_boosted = np.sum(kernel.lpl()*Cl[L], axis=1)
+
+    if nu:
+        assert len(nu)==1, "only one frequency (nu) can be provided"
+        Cl_boosted = np.sum(kernel.nu_lpl(nu[0]) * Cl_ext[L], axis=1)
+    else:
+        Cl_boosted = np.sum(kernel.lpl * Cl_ext[L], axis=1)
     
     return Cl_boosted
+
 
