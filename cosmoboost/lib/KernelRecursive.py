@@ -13,7 +13,7 @@ from scipy.misc import derivative, factorial, comb
 import logging
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(level=logging.INFO)
+logger.setLevel(level=logging.WARN)
 
 sign_pref = {0: "0",
              1: "+",
@@ -42,20 +42,20 @@ def get_K_d(K, d, s):
 
     Returns
     -------
-        ndarray((lmax+1)*(lmax+2)/2,2*delta_ell+1): K_mlpl matrix with Doppler weight d"""
+        ndarray((lmax+1)*(lmax+2)/2,2*delta_ell+1): K_mLl matrix with Doppler weight d"""
 
     if d >= 1:
         # call the recursive function directly
-        K_d_mlpl = _K_d_lift(K, d, s)
-        return K_d_mlpl
+        K_d_mLl = _K_d_lift(K, d, s)
+        return K_d_mLl
 
     elif d < 1:
         # use the symmetry prooprty of the Kernel to save calculation time
         # convert d to positive number and use transpose of the Kernel
-        K_d_mlpl = _K_d_lift(K, 2 - d, -s)
-        K_d_mllp = mh.transpose(K_d_mlpl, K.delta_ell)
+        K_d_mLl = _K_d_lift(K, 2 - d, -s)
+        K_d_mlL = mh.transpose(K_d_mLl, K.delta_ell)
 
-        return mh.minus_one_LplusLp(K.delta_ell, K.lmax) * K_d_mllp
+        return mh.minus_one_LplusLp(K.delta_ell, K.lmax) * K_d_mlL
 
 
 def _K_d_lift(K, d, s):
@@ -74,7 +74,7 @@ def _K_d_lift(K, d, s):
 
     Returns
     -------
-        K_mlpl matrix with Doppler weight d
+        K_mLl matrix with Doppler weight d
 
     """
 
@@ -82,7 +82,7 @@ def _K_d_lift(K, d, s):
 
     # no need to do anything if d=1
     if d == 1:
-        return K._mlpl_d1
+        return K._mLl_d1
 
     elif d > 1:
         key = sign_pref[np.sign(s)]+"d{}".format(d)
@@ -178,8 +178,8 @@ def get_K_nu_d(K_d_arr, nu, pars, freq_func=None, return_normalize=True):
     for n in range(beta_exp_order+1):
         kfactor = 0.0
         for k in range(n+1):
-            Klplm = K_d_arr[k]
-            kfactor += Klplm * (-1.0)**(n+k) * comb(n, k)
+            KLlm = K_d_arr[k]
+            kfactor += KLlm * (-1.0)**(n+k) * comb(n, k)
         
         Kernel = Kernel + np.true_divide(kfactor, factorial(n))*nu**n * \
                             derivative(freq_func, nu, dx=dx, n=n, args=(T,), order=13)

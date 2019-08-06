@@ -42,15 +42,11 @@ def get_Blm_Clm(delta_ell, lmax,s):
 
     return Blm, Clm
 
-# TODO: remove this
 def get_ML_matrix(delta_ell, lmax, lmin=0):
     """calculate the Mmatrix and Lmatrix:
     the Xmatrix returns the x index values for each element of the kernel matrix"""
 
     width = 2*delta_ell+1
-    
-    #Mmatrix= np.array([])
-    #Lpmatrix = np.array([])
 
     Mmatrix = np.concatenate([m*np.ones(lmax+1-max(lmin, m)) for m in range(0, lmax+1)])
     Lpmatrix = np.concatenate([np.arange(max(lmin, m), lmax+1) for m in range(0, lmax+1)])
@@ -68,9 +64,6 @@ def get_MLpL_matrix(delta_ell, lmax, lmin=0):
 
     width = 2*delta_ell+1
     
-    #Mmatrix= np.array([])
-    #Lpmatrix = np.array([])
-
     Mmatrix = np.concatenate([m*np.ones(lmax+1-max(lmin, m)) for m in range(0, lmax+1)])
     Lpmatrix = np.concatenate([np.arange(max(lmin, m), lmax+1) for m in range(0, lmax+1)])
         
@@ -107,7 +100,7 @@ def minus_one_LplusLp(delta_ell, lmax):
     
     
 def transpose(kernel, delta_ell):
-    """calculates the transpose kernel (K_mllp)"""
+    """calculates the transpose kernel (K_mlL)"""
     
     inv = np.zeros(kernel.shape)
     for i in range(2*delta_ell+1):
@@ -119,7 +112,6 @@ def transpose(kernel, delta_ell):
 # functions for shifting the rows
 # and columns of the matrices
 # -------------------------------
-
 
 def shift_right(arr):
     arr = arr.T
@@ -175,9 +167,9 @@ def shift(arr, j):
 #######################################################
 
 
-def mlp2indx(m, lp, lmax, lmin=0):
-    """convert mlp to column index"""
-    return m*(2*lmax+1-m)//2+lp
+def mL2indx(m, L, lmax, lmin=0):
+    """convert mL to column index"""
+    return m*(2*lmax+1-m)//2+L
 
 
 def getindxminmax(m, l, lmin, lmax):

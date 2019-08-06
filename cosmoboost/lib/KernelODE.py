@@ -13,49 +13,20 @@ from scipy.integrate import odeint, solve_ivp
 from lib import FileHandler as fh
 from lib import MatrixHandler as mh
 from lib.mytimer import timeit
+from numba import jit
 
 import logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.WARN)
 # number of steps for returntig the solution to the Differential Equation
 N = 2  # first and last
 
 def dK_deta(Kstore, eta, Bmatrix):
-    '''The derivative of the Kernel for index m and lp'''
+    '''The derivative of the Kernel for index m and L'''
     K_return = mh.shift_left(Bmatrix*Kstore) - Bmatrix*mh.shift_right(Kstore)
 
     return K_return
 
-# def dK_deta_loop(K_ellp,eta,m,ellp):
-#     '''The derivative of the Kernel for index m and lp'''
-#     #set index m to the predefined value M
-#     #m = M
-#
-#     #determine the length of the input kernel array K
-#     l_max = len(K_ellp)
-#
-#     #initialize the output kernel array Kp with the same size as the input array K
-#     Kp_ellp = np.zeros(l_max)
-#
-#     #pick the range \pm delta_ell around lp to loop over
-#     #the other elements of the kernel are essentially zero
-#     #so the loop goes only over the non-zero values to speed up the code
-#
-#
-#     L = np.arange(ellp-delta_ell,ellp+delta_ell+1)
-#     L = L[L>=0]
-#     L = L[L<=l_max-1]
-#     #print L
-#     #define the derivative according to the ODE (eq. 44 in Dai, Chluba 2014)
-#
-#     for l in L:
-#         #Kp_ellp[l] = + (0.0,Blm[l+1,m]*K_ellp[l+1])[l<l_max] - (0.0,Blm[l,m]*K_ellp[l-1])[l>0]
-#         if l == 0: Kp_ellp[0] = Blm[1,m]*K_ellp[1]
-#         elif l == l_max-1: Kp_ellp[l_max-1] = -Blm[l_max-1,m]*K_ellp[l_max-2]
-#         else: Kp_ellp[l] = + Blm[l+1,m]*K_ellp[l+1] - Blm[l,m]*K_ellp[l-1]
-#
-#
-#     return Kp_ellp
 
 
 def solve_K_T_ODE(pars, save_kernel=True, rtol=1.e-3, atol=1.e-6, mxstep=0):
@@ -158,7 +129,7 @@ def solve_K_T_ODE(pars, save_kernel=True, rtol=1.e-3, atol=1.e-6, mxstep=0):
         eta = np.linspace(0, np.arctanh(beta), N)
 
         print("beta (v/c) : ", beta)
-        print("eta (arctanh(beta) : ", eta[-1])
+        print("eta (arctanh(beta)) : ", eta[-1])
 
         # solve the ODE for a range of ell'  between lmin=0 and lmax
         # dK_deta is the derivative of the aberration kernel with respect to eta is defined
@@ -179,19 +150,25 @@ def solve_K_T_ODE(pars, save_kernel=True, rtol=1.e-3, atol=1.e-6, mxstep=0):
     #         save to file
     # ------------------------------
     if save_kernel:
-        
-        kernel_file_name = fh.get_kernel_filename(pars)
-        dir_name = fh.dirname(lmax=lmax, beta=beta)
-        print(f"dirname = {dir_name}")
-        if not os.path.exists(dir_name):
-            os.makedirs(dir_name)
-            print(f"The following directory was created to save the kernel file:\n{dir_name}")
-
-        # save the kernel to file
-        # tag as D1 (Doppler weight =1)
-        fh.save_kernel(kernel_file_name, K_T, 'D1')
-        print(f"Kernel saved in:\n{kernel_file_name}")
+        save_KT2file(pars, K_T)
     
     
     return K_T
 
+
+def save_KT2file(pars, K_T):
+
+    lmax = pars["lmax"]
+    beta = pars["beta"]
+
+    kernel_file_name = fh.get_kernel_filename(pars)
+    dir_name = fh.dirname(lmax=lmax, beta=beta)
+    print(f"dirname = {dir_name}")
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+        print(f"The following directory was created to save the kernel file:\n{dir_name}")
+
+    # save the kernel to file
+    # tag as D1 (Doppler weight =1)
+    fh.save_kernel(kernel_file_name, K_T, 'D1')
+    print(f"Kernel saved in:\n{kernel_file_name}")
