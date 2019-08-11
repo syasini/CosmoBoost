@@ -39,6 +39,7 @@ DEFAULT_PARS = {
 # TODO: add custom frequency function
 FREQ_DICT = {
     "CMB" : ff.F_nu,
+    "kSZ" : ff.F_kSZ,
     "tSZ" : ff.F_tSZ,
     }
 
