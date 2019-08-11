@@ -50,3 +50,12 @@ def F_tSZ(nu, T, normalized=False):
     else:
         F = F_nu(nu, T) * g
         return F
+
+
+@np.vectorize
+def F_kSZ(nu, T, normalized=False):
+    """The frequency function of kSZ Intensity (tau*beta effect) at frequency nu (GHz)
+    Default setting returns the frequency function normalized by the differential black body
+    spectrum"""
+
+    return F_nu(nu, T, normalized=normalized)
