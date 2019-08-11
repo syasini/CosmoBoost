@@ -185,8 +185,8 @@ def mL2indx(m, L, lmax, lmin=0):
     """
 
     assert lmin==0
-    assert 0 <= m <= L, "m is outside of the valid range 0 <= m <= L"
-    assert 0 <= L <= lmax, "L is outside of the valid range 0 <= L <= lmax"
+    #assert 0 <= m <= L, "m is outside of the valid range 0 <= m <= L"
+    #assert 0 <= L <= lmax, "L is outside of the valid range 0 <= L <= lmax"
     return m*(2*lmax+1-m)//2+L
 
 
