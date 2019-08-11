@@ -24,7 +24,7 @@ See the `tutorial.ipynb` notebook for an overview of the features through a set 
 - python 3 [![stable](https://img.shields.io/badge/tested%20on-v3.6-brightgreen)](https://www.python.org/downloads/release/python-360/)
 - numpy [![stable](https://img.shields.io/badge/tested%20on-v1.16.4-brightgreen)](https://pypi.org/project/numpy/1.16.4/)
 - scipy [![stable](https://img.shields.io/badge/tested%20on-v1.2.1-brightgreen)](https://pypi.org/project/scipy/1.2.1/)
-- healpy (needed for running the tutorial)[![stable](https://img.shields.io/badge/tested%20on-v1.12.9-brightgreen)](https://pypi.org/project/healpy/)
+- healpy[![stable](https://img.shields.io/badge/tested%20on-v1.12.9-brightgreen)](https://pypi.org/project/healpy/)(needed for running the tutorial)
 
 # Installation
 
