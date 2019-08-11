@@ -166,9 +166,27 @@ def shift(arr, j):
 #           Index and binning functions
 #######################################################
 
-
 def mL2indx(m, L, lmax, lmin=0):
-    """convert mL to column index"""
+    """convert mL to column index
+    Used for slicing the Kernel elements K.mLl (see tutorial)
+
+    *lmin is always zero. It is merely presented in the args for clarity
+
+    Usage example:
+
+    m = 0
+    L = 10
+    lmax=100
+
+    indx = cb.mL2indx(m, L, lmax)
+
+    K_mL_slice = kernel.mLl[indx]
+
+    """
+
+    assert lmin==0
+    assert 0 <= m <= L, "m is outside of the valid range 0 <= m <= L"
+    assert 0 <= L <= lmax, "L is outside of the valid range 0 <= L <= lmax"
     return m*(2*lmax+1-m)//2+L
 
 
@@ -180,9 +198,5 @@ def getindxminmax(m, l, lmin, lmax):
         return (2*l-(1+lmin)*lmin+(2*lmax-m+1) * m)//2
 
 
-def bin_array(array, bin_size):
-    """bin the input array given the bin_size"""
-    binned_array = array[:(array.size // bin_size) * bin_size].reshape(-1, bin_size).mean(axis=1)
 
-    return binned_array
 

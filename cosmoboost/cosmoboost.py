@@ -8,7 +8,6 @@ import sys
 import os
 import numpy as np
 import warnings
-import pdb
 
 from cosmoboost import COSMOBOOST_DIR
 sys.path.insert(0, COSMOBOOST_DIR)
@@ -49,7 +48,25 @@ FREQ_DICT = {
 ##################################################
 
 class Kernel(object):
-    """Generalized Doppler and aberration Kernel class"""
+    """Generalized Doppler and aberration Kernel class
+
+    Usage example:
+
+    # construct the kernel using the default parameters
+
+    pars = cb.DEFAULT_PARS
+    kernel = cb.Kernel(pars)
+
+    # and call the kernel coefficients simply as
+
+    kernel.mLl
+
+    # and the generalized kernel at frequency nu [GHz]
+
+    kernel.nu_mLl(nu)
+
+    """
+
     def __init__(self,
                  pars=DEFAULT_PARS,
                  overwrite=False,

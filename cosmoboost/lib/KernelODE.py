@@ -13,7 +13,6 @@ from scipy.integrate import odeint, solve_ivp
 from lib import FileHandler as fh
 from lib import MatrixHandler as mh
 from lib.mytimer import timeit
-from numba import jit
 
 import logging
 logger = logging.getLogger(__name__)
@@ -78,18 +77,6 @@ def solve_K_T_ODE(pars, save_kernel=True, rtol=1.e-3, atol=1.e-6, mxstep=0):
         K0 = np.tensordot(np.ones(height), K0,axes=0)
 
 
-        #TODO: remove this block:
-
-        # initialze K_T to store the temperature aberration kernel matrix
-        # after solving the ODE
-        # K_T = np.empty((height,width))
-        # K_T.fill(np.nan)
-        # evaluate the Blm coefficients
-        # Blm = get_Blm(delta_ell=delta_ell,lmax=lmax,lmin=lmin,s=s)
-        #fetch the Lmatrix and Mmatrix from file_handler.py
-        #the elements of these matrices return the ell and m indices stored in that spot
-
-
         # initialize matrices file name from input parameters
         matrices_file_name = fh.get_matrices_filename(pars)
         # if they already exist, load them from disc
@@ -113,11 +100,8 @@ def solve_K_T_ODE(pars, save_kernel=True, rtol=1.e-3, atol=1.e-6, mxstep=0):
         K0 = np.insert(K0, [2*delta_ell+1,2*delta_ell+1],0,axis=1)
         Bmatrix = np.insert(Bmatrix,[2*delta_ell+1,2*delta_ell+1],0,axis=1)
 
-        # TODO: look at scipy.ode_inv
-        #reshape all the 2D matrices to 1D arrays so that the ODE can be solved in vectorized mode
+        # reshape all the 2D matrices to 1D arrays so that the ODE can be solved in vectorized mode
         K0 = K0.reshape((width+2)*height)
-        #K_T = K_T.reshape((width+2)*height)
-        #Bmatrix = np.ones((width,height))
         Bmatrix = Bmatrix.reshape((width+2)*height)
 
         # ------------------------------
