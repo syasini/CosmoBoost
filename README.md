@@ -8,7 +8,7 @@
 
 
 
-CosmoBoost is a python package for Lorentz boosting anisotropic temperature and polarization maps in healpix format. The calculations are done in harmonic space based on the *Doppler and aberration kernel formalism* developed in [Yasini & Pierpaoli (2017)](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.96.103502) and [Dai & Chluba (2014)](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.89.123504).  
+CosmoBoost is a python package for Lorentz boosting anisotropic temperature and polarization maps in healpix format. The calculations are done in spherical harmonic space based on the *relativistic Doppler and aberration kernel formalism* developed in [Yasini & Pierpaoli (2017)](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.96.103502) and [Dai & Chluba (2014)](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.89.123504), following up on the original idea by [Challinor & van Leeuwen (2002](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.65.103001).
 
 
 Currently the supported radiation types are:
