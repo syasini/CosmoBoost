@@ -8,7 +8,8 @@ __email__ = "yasini@usc.edu"
 import numpy as np
 from . import FileHandler as fh
 from . import MatrixHandler as mh
-from scipy.misc import derivative, factorial, comb
+from scipy.misc import derivative
+from scipy.special import factorial, comb
 
 import logging
 logging.basicConfig()
