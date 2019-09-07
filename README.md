@@ -42,7 +42,7 @@ and run
 
 or use pip
 
-`pip install . [-e]`
+`pip install [-e] .`
 
 the `-e` argument will install the package in editable mode which is suitable for developement. If you want to modify the code use this option. 
 
