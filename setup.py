@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='cosmoboost',
-      version='0.3',
+      version='1.0',
       description='a python package for boosting the cosmos!',
       url='https://github.com/syasini/CosmoBoost',
       author='Siavash Yasini',
