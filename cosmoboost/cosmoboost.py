@@ -12,11 +12,11 @@ import warnings
 #from cosmoboost import COSMOBOOST_DIR
 #sys.path.insert(0, COSMOBOOST_DIR)
 
-from lib import FileHandler as fh
-from lib import FrequencyFunctions as ff
-from lib import MatrixHandler as mh
-from lib import KernelODE
-from lib import KernelRecursive as kr
+from .lib import FileHandler as fh
+from .lib import FrequencyFunctions as ff
+from .lib import MatrixHandler as mh
+from .lib import KernelODE
+from .lib import KernelRecursive as kr
 
 import logging
 logger = logging.getLogger(__name__)
