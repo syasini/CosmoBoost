@@ -22,14 +22,16 @@ pars = cb.DEFAULT_PARS
 #-------------------
 
 # cosmoboost parameters
-lmax = pars['lmax'] = 500
+lmax = pars['lmax'] = 3000
 delta_ell = pars['delta_ell'] = 8
 pars['d'] = 1
 beta = pars['beta']
 T_0 = pars["T_0"]
 
 # simulation parameters
-n_sims = 10
+n_sims = 50
+file_prefix = 0
+
 show_plot = True
 
 # calculate the kernel
@@ -57,7 +59,7 @@ if __name__ == "__main__":
 
     #alms = np.array(alm_T_r_arr, alm_T_b_arr)
 
-    np.savez(f"alms_r_b_lmax={lmax}", r=alm_T_r_arr, b=alm_T_b_arr)
+    np.savez(f"alms_r_b_lmax={lmax}_n={n_sims}_set={file_prefix}", r=alm_T_r_arr, b=alm_T_b_arr)
 
     if show_plot:
 
