@@ -9,6 +9,7 @@ import os
 import numpy as np
 np.seterr(divide='ignore', invalid='ignore')
 
+from scipy import special
 from scipy.integrate import odeint, solve_ivp
 from lib import FileHandler as fh
 from lib import MatrixHandler as mh
@@ -26,13 +27,11 @@ def dK_deta(Kstore, eta, Bmatrix):
 
     return K_return
 
+def est_K_T_ODE(pars, save_kernel=True, rtol=1.e-3, atol=1.e-6, mxstep=0):
+    '''constructs the kernel analytically using the unmarked equation on page
+    10 of Dai, Chluba 2014 arXiv:1403.6117v2
 
 
-def solve_K_T_ODE(pars, save_kernel=True, rtol=1.e-3, atol=1.e-6, mxstep=0):
-    '''solves the ODE to find the temperature aberration kernel elements
-    uses Eq. 44 in Dai, Chluba 2014 arXiv:1403.6117v2
-    
-    
     Parameters
     ----------
     pars : dict
@@ -48,9 +47,72 @@ def solve_K_T_ODE(pars, save_kernel=True, rtol=1.e-3, atol=1.e-6, mxstep=0):
     -------
     K_T : 2D numpy array
         Each row corresponds to the (m,ell') index calculated with the getindx
-        scheme in the file_handler  . The rows correspond to different values of 
+        scheme in the file_handler  . The rows correspond to different values of
         ell for a neighborhood of delta_ell around ell'.
-        
+
+    '''
+    logger.info("rtol = {}\natol = {}".format(rtol, atol))
+    with timeit("Analytically determining the Doppler and aberration Kernel elements"):
+        # ------------------------------
+        # set up parameters and matrices
+        # ------------------------------
+        beta = pars['beta']
+        s = pars['s']
+        delta_ell = pars['delta_ell']
+        lmax = pars['lmax']
+
+        # initialize matrices file name from input parameters
+        matrices_file_name = fh.get_matrices_filename(pars)
+
+        # if they already exist, load them from disc
+        if fh.file_exists(matrices_file_name):
+            Mmatrix = fh.load_matrix(matrices_file_name, key='M')
+            Lmatrix = fh.load_matrix(matrices_file_name, key='L')
+        else:
+            Mmatrix, Lmatrix = mh.get_ML_matrix(delta_ell=delta_ell, lmax=lmax)
+
+        # construct the Bmatrix
+        Blms, _ = mh.get_Blm_Clm(delta_ell, lmax, s=0)
+        Bmatrix = Blms[Lmatrix, Mmatrix]
+        Bmatrix[np.isnan(Bmatrix)] = 0
+
+        # construct delta_ell matrix
+        dl = np.array([np.arange(-delta_ell,delta_ell+1),]*Bmatrix.shape[0])
+
+        # use J(v) function from scipy to analytically estimate K matrix
+        K_T = special.jv(dl, 2.*Bmatrix*beta)
+
+    # ------------------------------
+    #         save to file
+    # ------------------------------
+    if save_kernel:
+        save_KT2file(pars, K_T)
+
+    return K_T
+
+def solve_K_T_ODE(pars, save_kernel=True, rtol=1.e-3, atol=1.e-6, mxstep=0):
+    '''solves the ODE to find the temperature aberration kernel elements
+    uses Eq. 44 in Dai, Chluba 2014 arXiv:1403.6117v2
+
+
+    Parameters
+    ----------
+    pars : dict
+        dictionary of the kernel parameters
+
+    save_kernel : bool, optional
+        If True, the kernel elements will be saved to a file for later use
+
+    rtol, atol, mxstep: scalars
+        passed to scipy.odeint to set precision
+
+    Returns
+    -------
+    K_T : 2D numpy array
+        Each row corresponds to the (m,ell') index calculated with the getindx
+        scheme in the file_handler  . The rows correspond to different values of
+        ell for a neighborhood of delta_ell around ell'.
+
     '''
     logger.info("rtol = {}\natol = {}".format(rtol, atol))
     with timeit("calculating the Doppler and aberration Kernel elements"):
@@ -135,8 +197,8 @@ def solve_K_T_ODE(pars, save_kernel=True, rtol=1.e-3, atol=1.e-6, mxstep=0):
     # ------------------------------
     if save_kernel:
         save_KT2file(pars, K_T)
-    
-    
+
+
     return K_T
 
 

@@ -33,7 +33,8 @@ DEFAULT_PARS = {
     'beta_expansion_order': 4, # expansion order of beta
     'derivative_dnu': 1.0, # resolution of frequency derivative in GHz
     'normalize': True, # normalize to temperature units
-    'frequency_function': "CMB"
+    'frequency_function': "CMB",
+    'method': 'analytic'
                 }
 
 # TODO: add custom frequency function
@@ -84,6 +85,7 @@ class Kernel(object):
         self.overwrite = overwrite
         self.save_kernel = save_kernel
         self.freq_func = FREQ_DICT[pars["frequency_function"]]
+        self.method = pars['method']
 
         # set ell limits
         self.lmin = pars['lmin']
@@ -92,6 +94,9 @@ class Kernel(object):
 
         self.lmax = pars['lmax'] #+pars['delta_ell']  #TODO: add padding to this
                                                       #TODO: add private safe ell_max parameter
+
+        # dictionary for various kernel solvers
+        self.solver = {'analytic' : KernelODE.est_K_T_ODE, 'numerical' : KernelODE.solve_K_T_ODE}
 
         # set delta_ell
         safe_delta_ell = np.min((4, np.round(self.beta * (2 * self.lmax))))
@@ -111,7 +116,7 @@ class Kernel(object):
 
         # update the parameters
         self.update()
-        
+
     def update(self):
         """update the parameters and evaluate the kernel elements"""
 
@@ -125,7 +130,8 @@ class Kernel(object):
             'T_0':self.T_0, # Kelvins
             'beta_exp_order': self.beta_exp_order,
             'derivative_dnu': self.derivative_dnu,
-            'normalize': self.normalize
+            'normalize': self.normalize,
+            'method': self.method
         }
 
         # determine file names based on parameters
@@ -135,13 +141,13 @@ class Kernel(object):
         # initialize the matrices and coefficient matrix
         self._init_matrices()
         self._init_mLl()
-        
+
         self.mLl = []
 
     # ------------------------------
     #     Matrix initialization
     # ------------------------------
-    
+
     def _init_matrices(self):
         """initialize the kernel matrices"""
 
@@ -157,7 +163,7 @@ class Kernel(object):
             _, Clms = mh.get_Blm_Clm(delta_ell=self.delta_ell, lmax=self.lmax, s=self.s)
             self.Cmatrix = Clms[self.Lmatrix, self.Mmatrix]
             self.Smatrix = mh.get_S_matrix(self.Lmatrix, self.Mmatrix, self.s)
-        
+
             # save Mmatrix and Lmatrix for future use
             # matrices_file_name = fh.matrices_filename(pars)
             dir_name = fh.dirname(lmax=self.lmax, beta=self.beta)
@@ -166,25 +172,25 @@ class Kernel(object):
                 fh.save_matrices(self.matrices_filename, self.Mmatrix, 'M')
                 fh.save_matrices(self.matrices_filename, self.Lmatrix, 'L')
                 # generating Clm is relatively fast so there's no need to save to file
-                
+
                 print("Matrices saved in file:\n{}\n".format(self.matrices_filename))
                 print("Done!\n")
-    
+
     def _init_mLl(self):
-    
-        # initialize kernel with d=1    
+
+        # initialize kernel with d=1
         self._mLl_d1 = self._get_mLl_d1()
         # initialize (call setter) the mLl coefficients for d=1
         self._mLl = self._mLl_d1
         self._Ll = self._get_Ll()
 
     def _load_matrices(self):
-        
+
         print("Loading the index matrices...\n")
         self.Mmatrix = fh.load_matrix(self.matrices_filename, key="M")
         self.Lmatrix = fh.load_matrix(self.matrices_filename, key="L")
         #self.Lmatrix = fh.load_matrix(self.matrices_filename,key="L")
-        
+
         _, Clms = mh.get_Blm_Clm(delta_ell=self.delta_ell, lmax=self.lmax, s=self.s)
         self.Cmatrix = Clms[self.Lmatrix, self.Mmatrix]
         self.Smatrix = mh.get_S_matrix(self.Lmatrix, self.Mmatrix, self.s)
@@ -193,13 +199,13 @@ class Kernel(object):
     # ------------------------------
     #     m, ell', ell index (mLl)
     # ------------------------------
-    
+
     @property # mLl getter
     def mLl(self):
         # get values for mLl"
         return self._mLl
-        
-            
+
+
     @mLl.setter # mLl setter
     def mLl(self, value):
         if self.d == 1:
@@ -209,14 +215,14 @@ class Kernel(object):
             # set d>1 values for mLl"
             self._mLl = self._get_mLl()
 
-            
+
     @property #mLl getter
     def Ll(self):
-        
+
         # get values for mLl"
         return self._get_Ll()
-        
-            
+
+
     @Ll.setter #mLl setter
     def Ll(self, value):
         if self.d == 1:
@@ -237,9 +243,9 @@ class Kernel(object):
         if fh.file_exists(self.kernel_filename) and self.overwrite is False:
             print("Kernel loaded from file:\n {}\n".format(self.kernel_filename))
             K_mLl = fh.load_kernel(self.kernel_filename, key='D1')
-        else: 
+        else:
             print("Solving kernel ODE for d=1")
-            K_mLl = KernelODE.solve_K_T_ODE(self.pars, save_kernel=self.save_kernel)
+            K_mLl = self.solver[self.method](self.pars, save_kernel=self.save_kernel)
 
         return K_mLl
 
@@ -253,7 +259,7 @@ class Kernel(object):
         else:
             print("Solving kernel ODE for d=1")
             self._get_mLl_d1()
-        
+
         return kr.get_K_d(self, self.d, self.s)
 
 
@@ -286,14 +292,14 @@ class Kernel(object):
             K_d_arr[kr.d2indx(self.d, i)] = kr.get_K_d(self, i, self.s)
 
         return K_d_arr
-    
+
 
     def _get_Ll(self):
         """returns the Boost Power Transfer Matrix (BPTM) K_{L,l} defined in Yasini &
         Pierpeoli 2017"""
         K_mLl = self.mLl
         K_Ll = np.zeros((self.lmax+1, 2*self.delta_ell+1))
-        
+
         for L in range(self.lmax+1):
             # find all the m mode relevant for each ell'
             M = np.arange(self.lmin, L+1)
@@ -366,10 +372,10 @@ def boost_alm(alm, kernel, *nu):
 
     # slice the temperature alm
     almT = alm[0]
-    
+
     # initialize the boosted_alm array (1 or 3 dimensional)
     boosted_alm = np.zeros(alm.shape, dtype=np.complex)
-    
+
     # set the first column to boosted almT
     if nu:
         print("boosting T with nu [GHz] = {}".format(nu))
@@ -414,7 +420,7 @@ def _boost_almT(almT, kernel, *nu):
     extention = kernel.delta_ell
     # pad the alm with zero
     almT = np.append(almT, np.zeros(extention))
-    
+
     Mmatrix = kernel.Mmatrix
     Lmatrix = kernel.Lmatrix
 
@@ -429,7 +435,7 @@ def _boost_almT(almT, kernel, *nu):
     # otherwise do it for temperature
     else:
         alm_boosted = np.sum(kernel.mLl * almT[mh.mL2indx(Mmatrix, Lmatrix, lmax)], axis=1)
-    
+
     return alm_boosted
 
 
@@ -445,7 +451,7 @@ def _boost_almEB(almE, almB, kernel, *nu):
         kernel_plus = kernel.nu_mLl(nu[0])
     else:
         kernel_plus = kernel.mLl
-    
+
     kernel.s = -2
     kernel.update()
 
@@ -466,10 +472,10 @@ def _boost_almEB(almE, almB, kernel, *nu):
 
     Mmatrix = kernel.Mmatrix
     Lmatrix = kernel.Lmatrix
-    
+
     # sort and prepare alms for direct multiplication with kernel.mLl
     alm_indx = mh.mL2indx(Mmatrix, Lmatrix, lmax)
-    
+
     almE_boosted = np.sum(kernelEE_mLl*almE[alm_indx], axis=1) + np.sum(kernelEB_mLl*almB[
         alm_indx], axis=1)
     almB_boosted = np.sum(kernelEE_mLl*almB[alm_indx], axis=1) - np.sum(kernelEB_mLl*almE[
@@ -502,9 +508,9 @@ def boost_Cl(Cl, kernel, *nu):
     lmax = kernel.lmax
     delta_ell = kernel.delta_ell
     extention = (delta_ell*(2*lmax+1)+delta_ell**2)//2
-    
+
     Cl_ext = np.append(Cl, np.zeros(extention))
-    
+
     L = np.arange(lmax+1, dtype=int)
     ell = np.tensordot(L, np.ones(2 * delta_ell + 1, dtype=int), axes=0)\
                     + np.arange(-delta_ell, delta_ell+1, dtype=int)
@@ -514,7 +520,5 @@ def boost_Cl(Cl, kernel, *nu):
         Cl_boosted = np.sum(kernel.nu_Ll(nu[0]) * Cl_ext[ell], axis=1)
     else:
         Cl_boosted = np.sum(kernel.Ll * Cl_ext[ell], axis=1)
-    
+
     return Cl_boosted
-
-
