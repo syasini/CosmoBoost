@@ -27,7 +27,7 @@ def dK_deta(Kstore, eta, Bmatrix):
 
     return K_return
 
-def est_K_T_ODE(pars, save_kernel=True, rtol=1.e-3, atol=1.e-6, mxstep=0):
+def est_K_T_ODE(pars, save_kernel=True):
     '''constructs the kernel analytically using the unmarked equation on page
     10 of Dai, Chluba 2014 arXiv:1403.6117v2
 
@@ -40,8 +40,6 @@ def est_K_T_ODE(pars, save_kernel=True, rtol=1.e-3, atol=1.e-6, mxstep=0):
     save_kernel : bool, optional
         If True, the kernel elements will be saved to a file for later use
 
-    rtol, atol, mxstep: scalars
-        passed to scipy.odeint to set precision
 
     Returns
     -------
