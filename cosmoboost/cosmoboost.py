@@ -8,6 +8,7 @@ import sys
 import os
 import numpy as np
 import warnings
+import pdb
 
 # from cosmoboost import COSMOBOOST_DIR
 # sys.path.insert(0, COSMOBOOST_DIR)
@@ -143,7 +144,7 @@ class Kernel(object):
         self._init_matrices()
         self._init_mLl()
 
-        self.mLl = []
+        #self.mLl = []
 
     # ------------------------------
     #     Matrix initialization
@@ -182,7 +183,7 @@ class Kernel(object):
         # initialize kernel with d=1
         self._mLl_d1 = self._get_mLl_d1()
         # initialize (call setter) the mLl coefficients for d=1
-        self._mLl = self._mLl_d1
+        self._mLl = None
         self._Ll = self._get_Ll()
 
     def _load_matrices(self):
@@ -204,16 +205,24 @@ class Kernel(object):
     @property  # mLl getter
     def mLl(self):
         # get values for mLl"
-        return self._mLl
-
-    @mLl.setter  # mLl setter
-    def mLl(self, value):
         if self.d == 1:
             # set d=1 values for mLl"
-            self._mLl = self._mLl_d1
+            return self._mLl_d1
         else:
+            if self._mLl is None:
+                self._mLl = self._get_mLl()
             # set d>1 values for mLl"
-            self._mLl = self._get_mLl()
+
+            return self._mLl
+
+    # @mLl.setter  # mLl setter
+    # def mLl(self, value):
+    #     if self.d == 1:
+    #         # set d=1 values for mLl"
+    #         self._mLl = self._mLl_d1
+    #     else:
+    #         # set d>1 values for mLl"
+    #         self._mLl = self._get_mLl()
 
     @property  # mLl getter
     def Ll(self):
@@ -252,11 +261,15 @@ class Kernel(object):
         otherwise it will be calculated using the ODE"""
         if fh.file_exists(self.kernel_filename) and self.overwrite is False:
             print("Using Kernel for d=1 from file")
+            #self._mLl_d1 = fh.load_kernel(self.kernel_filename, key='D1')
         else:
-            print("Solving kernel ODE for d=1")
-            self._get_mLl_d1()
+            #print("Solving kernel ODE for d=1")
+            #self._mLl_d1 = self._get_mLl_d1()
 
-        return kr.get_K_d(self, self.d, self.s)
+            _K_d_mLl = kr.get_K_d(self, self.d, self.s)
+
+        #pdb.set_trace()
+        return _K_d_mLl
 
     def nu_mLl(self, nu):
         """return the Doppler and aberration kernel elements K^m_{ell' ell} at frequency nu [GHz]"""
