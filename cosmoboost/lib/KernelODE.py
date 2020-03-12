@@ -83,7 +83,7 @@ def est_K_T_ODE(pars, save_kernel=True):
         # use J(v) function from scipy to analytically estimate K matrix
 
         eta = np.arctanh(beta)
-        pdb.set_trace()
+        #pdb.set_trace()
         # use J(v) function from scipy to analytically estimate K matrix
         K_T = special.jv(dl, 2. * Bmatrix * eta)
         #K_T = analytical(dl, Bmatrix, eta)
