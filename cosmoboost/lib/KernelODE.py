@@ -4,26 +4,30 @@ library containing differential equation solver for d=1 kernel elements
 __author__ = " Siavash Yasini"
 __email__ = "yasini@usc.edu"
 
-
 import os
 import numpy as np
+from scipy.special import factorial
+import pdb
+
 np.seterr(divide='ignore', invalid='ignore')
 
 from scipy import special
 from scipy.integrate import odeint, solve_ivp
-from lib import FileHandler as fh
-from lib import MatrixHandler as mh
-from lib.mytimer import timeit
+from cosmoboost.lib import FileHandler as fh
+from cosmoboost.lib import MatrixHandler as mh
+from cosmoboost.lib.mytimer import timeit
 
 import logging
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARN)
-# number of steps for returntig the solution to the Differential Equation
+# number of steps for returning the solution to the Differential Equation
 N = 2  # first and last
+
 
 def dK_deta(Kstore, eta, Bmatrix):
     '''The derivative of the Kernel for index m and L'''
-    K_return = mh.shift_left(Bmatrix*Kstore) - Bmatrix*mh.shift_right(Kstore)
+    K_return = mh.shift_left(Bmatrix * Kstore) - Bmatrix * mh.shift_right(Kstore)
 
     return K_return
 
@@ -49,7 +53,7 @@ def est_K_T_ODE(pars, save_kernel=True):
         ell for a neighborhood of delta_ell around ell'.
 
     '''
-    logger.info("rtol = {}\natol = {}".format(rtol, atol))
+    # logger.info("rtol = {}\natol = {}".format(rtol, atol))
     with timeit("Analytically determining the Doppler and aberration Kernel elements"):
         # ------------------------------
         # set up parameters and matrices
@@ -70,15 +74,19 @@ def est_K_T_ODE(pars, save_kernel=True):
             Mmatrix, Lmatrix = mh.get_ML_matrix(delta_ell=delta_ell, lmax=lmax)
 
         # construct the Bmatrix
-        Blms, _ = mh.get_Blm_Clm(delta_ell, lmax, s=0)
+        Blms, _ = mh.get_Blm_Clm(delta_ell, lmax, s=s)
         Bmatrix = Blms[Lmatrix, Mmatrix]
         Bmatrix[np.isnan(Bmatrix)] = 0
 
         # construct delta_ell matrix
-        dl = np.array([np.arange(-delta_ell,delta_ell+1),]*Bmatrix.shape[0])
-
+        dl = np.array([np.arange(delta_ell, -delta_ell - 1, -1)] * Bmatrix.shape[0])
         # use J(v) function from scipy to analytically estimate K matrix
-        K_T = special.jv(dl, 2.*Bmatrix*beta)
+
+        eta = np.arctanh(beta)
+        pdb.set_trace()
+        # use J(v) function from scipy to analytically estimate K matrix
+        K_T = special.jv(dl, 2. * Bmatrix * eta)
+        #K_T = analytical(dl, Bmatrix, eta)
 
     # ------------------------------
     #         save to file
@@ -87,6 +95,7 @@ def est_K_T_ODE(pars, save_kernel=True):
         save_KT2file(pars, K_T)
 
     return K_T
+
 
 def solve_K_T_ODE(pars, save_kernel=True, rtol=1.e-3, atol=1.e-6, mxstep=0):
     '''solves the ODE to find the temperature aberration kernel elements
@@ -122,47 +131,43 @@ def solve_K_T_ODE(pars, save_kernel=True, rtol=1.e-3, atol=1.e-6, mxstep=0):
         s = pars['s']
         delta_ell = pars['delta_ell']
         lmax = pars['lmax']
-        #lmin= pars['lmin']
+        # lmin= pars['lmin']
 
         # set the height and width of the aberration kernel storage matrix.
         # the storage matrix is set around each value of ell' for a neighborhood of delta_ell
         # on each side. The middle value of each row corresponds to ell'=ell or delta_ell=0
         # the number of columns corresponds to different values of ell' for each m mode.
-        height, width = ((lmax+1)*(lmax+2)//2, 2*delta_ell+1)
-
+        height, width = ((lmax + 1) * (lmax + 2) // 2, 2 * delta_ell + 1)
 
         # initialize the K0 = dirac_delta(ell,ell') (initial condition for the ODE)
         K0 = np.zeros(width)
-        K0[delta_ell]=1
-        K0 = np.tensordot(np.ones(height), K0,axes=0)
-
+        K0[delta_ell] = 1
+        K0 = np.tensordot(np.ones(height), K0, axes=0)
 
         # initialize matrices file name from input parameters
         matrices_file_name = fh.get_matrices_filename(pars)
         # if they already exist, load them from disc
         if fh.file_exists(matrices_file_name):
-            Mmatrix = fh.load_matrix(matrices_file_name,key='M')
-            Lmatrix = fh.load_matrix(matrices_file_name,key='L')
+            Mmatrix = fh.load_matrix(matrices_file_name, key='M')
+            Lmatrix = fh.load_matrix(matrices_file_name, key='L')
         else:
-            Mmatrix,Lmatrix = mh.get_ML_matrix(delta_ell=delta_ell,lmax=lmax)
-
+            Mmatrix, Lmatrix = mh.get_ML_matrix(delta_ell=delta_ell, lmax=lmax)
 
         # construct the Bmatrix corresponding to the elements of K0
         Blms, _ = mh.get_Blm_Clm(delta_ell, lmax, s=s)
         Bmatrix = Blms[Lmatrix, Mmatrix]
         Bmatrix[np.isnan(Bmatrix)] = 0
 
-
         # (safety) pad K and B matrices to avoid leakage from the edges
         # necessary when using odeint solver
         # add two zeros to the end of each row
         # FIXME: is two enough for all ell?
-        K0 = np.insert(K0, [2*delta_ell+1,2*delta_ell+1],0,axis=1)
-        Bmatrix = np.insert(Bmatrix,[2*delta_ell+1,2*delta_ell+1],0,axis=1)
+        K0 = np.insert(K0, [2 * delta_ell + 1, 2 * delta_ell + 1], 0, axis=1)
+        Bmatrix = np.insert(Bmatrix, [2 * delta_ell + 1, 2 * delta_ell + 1], 0, axis=1)
 
         # reshape all the 2D matrices to 1D arrays so that the ODE can be solved in vectorized mode
-        K0 = K0.reshape((width+2)*height)
-        Bmatrix = Bmatrix.reshape((width+2)*height)
+        K0 = K0.reshape((width + 2) * height)
+        Bmatrix = Bmatrix.reshape((width + 2) * height)
 
         # ------------------------------
         #           solve ODE
@@ -178,17 +183,17 @@ def solve_K_T_ODE(pars, save_kernel=True, rtol=1.e-3, atol=1.e-6, mxstep=0):
         # solve the ODE for a range of ell'  between lmin=0 and lmax
         # dK_deta is the derivative of the aberration kernel with respect to eta is defined
         sol = odeint(dK_deta, K0, eta, args=(Bmatrix,), rtol=rtol, atol=atol, mxstep=mxstep,
-                 printmessg=True)
+                     printmessg=True)
 
         # TODO: try scipy.ode_inv
-        #sol = solve_ivp(dK_deta, eta, K0, args=(Bmatrix,), rtol=rtol, atol=atol, mxstep=mxstep,
+        # sol = solve_ivp(dK_deta, eta, K0, args=(Bmatrix,), rtol=rtol, atol=atol, mxstep=mxstep,
         #             printmessg=True)
 
         # store the results in the K_T matrix
-        K_T = sol[N-1].reshape(height,width+2)
+        K_T = sol[N - 1].reshape(height, width + 2)
 
         # remove the zero padding from the final solution
-        K_T = np.delete(K_T, [2*delta_ell+1,2*delta_ell+2],axis=1)
+        K_T = np.delete(K_T, [2 * delta_ell + 1, 2 * delta_ell + 2], axis=1)
 
     # ------------------------------
     #         save to file
@@ -196,12 +201,10 @@ def solve_K_T_ODE(pars, save_kernel=True, rtol=1.e-3, atol=1.e-6, mxstep=0):
     if save_kernel:
         save_KT2file(pars, K_T)
 
-
     return K_T
 
 
 def save_KT2file(pars, K_T):
-
     lmax = pars["lmax"]
     beta = pars["beta"]
 
