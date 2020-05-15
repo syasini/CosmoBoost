@@ -2,7 +2,7 @@
 
 [![author](https://img.shields.io/badge/author-syasini-red)](https://github.com/syasini)
 [![MIT license](http://img.shields.io/badge/license-MIT-blue.svg)](http://opensource.org/licenses/MIT)
-[![stable](https://img.shields.io/badge/stable-v1.0-green)](https://github.com/syasini/CosmoBoost)
+[![stable](https://img.shields.io/badge/stable-v1.1-green)](https://github.com/syasini/CosmoBoost)
 [![DOI](https://zenodo.org/badge/201807898.svg)](https://zenodo.org/badge/latestdoi/201807898)
 
 [![email](https://img.shields.io/badge/email-yasini%40usc.edu-lightgrey)](mailto:yasini@usc.edu)
@@ -29,7 +29,11 @@ See the `tutorial.ipynb` notebook for an overview of the features through a set 
 
 # Installation
 
-First, clone the repository by running 
+You can install CosmoBoost from pypi using 
+
+`pip install cosmoboost`
+
+Alternatively, you can clone the repository by running 
 
 `git clone https://github.com/syasini/CosmoBoost.git` 
 
