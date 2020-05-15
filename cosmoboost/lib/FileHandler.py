@@ -208,7 +208,7 @@ def load_matrix(matrices_file_name, key='M'):
     # raise error if the file does not exist
     except IOError:
         print("\nFile does not exist:\n{}".format(matrices_file_name))
-
+        raise
 
 
 
