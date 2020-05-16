@@ -11,7 +11,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='cosmoboost',
-      version='1.1.1',
+      version='1.1.3',
       description='a python package for boosting the cosmos!',
       url='https://github.com/syasini/CosmoBoost',
       install_requires=reqs,
