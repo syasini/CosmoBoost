@@ -10,14 +10,14 @@ import numpy as np
 import warnings
 import pdb
 
-# from cosmoboost import COSMOBOOST_DIR
-# sys.path.insert(0, COSMOBOOST_DIR)
+from cosmoboost import COSMOBOOST_DIR
+sys.path.insert(0, COSMOBOOST_DIR)
 
-from cosmoboost.lib import FileHandler as fh
-from cosmoboost.lib import FrequencyFunctions as ff
-from cosmoboost.lib import MatrixHandler as mh
-from cosmoboost.lib import KernelODE
-from cosmoboost.lib import KernelRecursive as kr
+from .lib import FileHandler as fh
+from .lib import FrequencyFunctions as ff
+from .lib import MatrixHandler as mh
+from .lib import KernelODE
+from .lib import KernelRecursive as kr
 
 import logging
 

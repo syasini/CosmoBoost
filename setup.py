@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 # read the contents of requirements.txt
 with open("requirements.txt", "r") as f:
@@ -11,7 +11,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='cosmoboost',
-      version='1.1.1',
+      version='1.1.6',
       description='a python package for boosting the cosmos!',
       url='https://github.com/syasini/CosmoBoost',
       install_requires=reqs,
@@ -20,4 +20,6 @@ setup(name='cosmoboost',
       author='Siavash Yasini',
       author_email='yasini@usc.edu',
       license='MIT',
-      packages=['cosmoboost'])
+      packages=find_packages(),
+      include_package_data=True,
+      )

@@ -22,14 +22,14 @@ pars = cb.DEFAULT_PARS
 #-------------------
 
 # cosmoboost parameters
-lmax = pars['lmax'] = 3000
+lmax = pars['lmax'] = 1000
 delta_ell = pars['delta_ell'] = 8
 pars['d'] = 1
 beta = pars['beta']
 T_0 = pars["T_0"]
 
 # simulation parameters
-n_sims = 50
+n_sims = 5
 file_prefix = 0
 
 show_plot = True
