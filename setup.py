@@ -21,5 +21,6 @@ setup(name='cosmoboost',
       author_email='yasini@usc.edu',
       license='MIT',
       packages=find_packages(),
+      data_files=[('', ['cosmoboost/lib/sample_Cl.npz'])],
       include_package_data=True,
       )
