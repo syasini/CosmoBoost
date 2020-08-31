@@ -259,14 +259,16 @@ class Kernel(object):
         """return the DC aberration kernel elements K^m_{\ell' \ell} for d!=1
         if the kernel has been calculated before, it will be loaded
         otherwise it will be calculated using the ODE"""
-        if fh.file_exists(self.kernel_filename) and self.overwrite is False:
-            print("Using Kernel for d=1 from file")
+        # FIXME: revise the logic here
+        #if fh.file_exists(self.kernel_filename) and self.overwrite is False:
+        #    print("Using Kernel for d=1 from file")
+        #    _K_d_mLl = fh.load_kernel(self.kernel_filename, key='D1')
             #self._mLl_d1 = fh.load_kernel(self.kernel_filename, key='D1')
-        else:
+        #else:
             #print("Solving kernel ODE for d=1")
             #self._mLl_d1 = self._get_mLl_d1()
 
-            _K_d_mLl = kr.get_K_d(self, self.d, self.s)
+        _K_d_mLl = kr.get_K_d(self, self.d, self.s)
 
         #pdb.set_trace()
         return _K_d_mLl
