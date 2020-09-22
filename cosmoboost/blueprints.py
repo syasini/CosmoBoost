@@ -36,7 +36,8 @@ DEFAULT_PARS = {
     'derivative_dnu'      : 1.0,  # resolution of frequency derivative in GHz
     'normalize'           : True,  # normalize to temperature units
     'frequency_function'  : "CMB",
-    'method'              : 'analytic'  # set to 'numerical' for scipy.odeint solver
+    'method'              : 'numerical'  # set to 'numerical' to use scipy.odeint solver
+                                         # set to 'analytic' to use Bessel function approx.
     }
 
 # TODO: add custom frequency function
