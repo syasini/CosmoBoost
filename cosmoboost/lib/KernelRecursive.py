@@ -87,8 +87,11 @@ def _K_d_lift(K, d, s):
 
     elif d > 1:
         key = sign_pref[np.sign(s)]+"d{}".format(d)
-        logger.info("loading key {}".format(key))
+        logger.info("key = {}".format(key))
+
         try:
+            if K.overwrite:
+                raise LookupError("Kernel should be calculated")
             logger.info("loading key {}".format(key))
             K_d = fh.load_matrix(K.kernel_filename, key=key)
         except:
