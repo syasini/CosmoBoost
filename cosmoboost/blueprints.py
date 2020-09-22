@@ -156,11 +156,13 @@ class Kernel(object):
         """initialize the kernel matrices"""
 
         # check to see if the file exists
+        # if it does, load it
         if fh.file_exists(self.matrices_filename) and self.overwrite is False:
 
             print("\nMatrices loaded from file:\n{}\n".format(self.matrices_filename))
             self._load_matrices()
 
+        # otherwise calculate the matrices and save them to file
         else:
             print("Calculating the index matrices...\n")
             self.Mmatrix, self.Lmatrix = mh.get_ML_matrix(self.delta_ell, self.lmax)
