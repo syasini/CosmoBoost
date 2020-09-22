@@ -101,6 +101,7 @@ class Kernel(object):
         # dictionary for various kernel solvers
         self.solver = {'analytic': KernelODE.est_K_T_ODE, 'numerical': KernelODE.solve_K_T_ODE}
 
+        # TODO: move this to a private mathod self._set_delta_ell
         # set delta_ell
         safe_delta_ell = np.min((4, np.round(self.beta * (2 * self.lmax))))
         try:
@@ -131,7 +132,7 @@ class Kernel(object):
             'lmax'          : self.lmax,
             'delta_ell'     : self.delta_ell,
             'T_0'           : self.T_0,  # Kelvins
-            'beta_exp_order': self.beta_exp_order,
+            'beta_expansion_order': self.beta_exp_order,
             'derivative_dnu': self.derivative_dnu,
             'normalize'     : self.normalize,
             'method'        : self.method
