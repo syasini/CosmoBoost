@@ -51,7 +51,7 @@ def get_K_d(K, d, s):
         return K_d_mLl
 
     elif d < 1:
-        # use the symmetry prooprty of the Kernel to save calculation time
+        # use the symmetry property of the Kernel to save calculation time
         # convert d to positive number and use transpose of the Kernel
         K_d_mLl = _K_d_lift(K, 2 - d, -s)
         K_d_mlL = mh.transpose(K_d_mLl, K.delta_ell)
@@ -138,11 +138,11 @@ def calc_K_d_arr(K, d, s):
     -------
         ndarray(beta_exp_order,(lmax+1)*(lmax+2)/2,2*delta_ell+1)
     """
-    height, width = ((K.lmax+1)*(K.lmax+2)//2,2*K.delta_ell+1)
-    K_d_arr = np.zeros((K.beta_exp_order+1,height,width))
-    for i in range(d,d-K.beta_exp_order-1,-1):
-        logger.info("d, i = {},{}".format(d,i))
-        K_d_arr[d2indx(d,i)] = get_K_d(K,i,s)
+    height, width = ((K.lmax+1)*(K.lmax+2)//2, 2*K.delta_ell+1)
+    K_d_arr = np.zeros((K.beta_exp_order+1, height, width))
+    for i in range(d, d-K.beta_exp_order-1, -1):
+        logger.info("d, i = {},{}".format(d, i))
+        K_d_arr[d2indx(d, i)] = get_K_d(K, i, s)
     
     return K_d_arr
 
@@ -195,7 +195,7 @@ def get_K_nu_d(K_d_arr, nu, pars, freq_func=None, return_normalize=True):
         return Kernel
 
 
-def d2indx(d,i):
+def d2indx(d, i):
     """convert the Doppler weight of the kernel to the index of the array"""
     return d-i
 
