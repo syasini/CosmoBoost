@@ -173,7 +173,7 @@ def get_K_nu_d(K_d_arr, nu, pars, freq_func=None, return_normalize=True):
 
     """
     # extract some parameters
-    beta_exp_order = pars['beta_exp_order']
+    beta_exp_order = pars['beta_expansion_order']
     T = pars['T_0']
     dx = pars['derivative_dnu']
 
