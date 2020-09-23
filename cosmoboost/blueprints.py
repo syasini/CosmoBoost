@@ -255,7 +255,10 @@ class Kernel(object):
             K_mLl = fh.load_kernel(self.kernel_filename, key='D1')
         else:
             print("Solving kernel ODE for d=1")
-            K_mLl = self.solver[self.method](self.pars, save_kernel=self.save_kernel)
+            try:
+                K_mLl = self.solver[self.method](self.pars, save_kernel=self.save_kernel)
+            except KeyError as e :
+                raise type(e)(f"'{self.method}' is not a valid key. Use one of the following: {self.solver.keys()}")
 
         return K_mLl
 
