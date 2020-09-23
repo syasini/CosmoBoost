@@ -36,8 +36,8 @@ DEFAULT_PARS = {
     'derivative_dnu'      : 1.0,  # resolution of frequency derivative in GHz
     'normalize'           : True,  # normalize to temperature units
     'frequency_function'  : "CMB",
-    'method'              : 'numerical'  # set to 'numerical' to use scipy.odeint solver
-                                         # set to 'analytic' to use Bessel function approx.
+    'method'              : 'ODE'  # set to 'ODE' to use scipy.odeint solver
+                                         # set to 'Bessel' to use Bessel function approx.
     }
 
 # TODO: add custom frequency function
@@ -99,7 +99,7 @@ class Kernel(object):
         # TODO: add private safe ell_max parameter
 
         # dictionary for various kernel solvers
-        self.solver = {'analytic': KernelODE.est_K_T_ODE, 'numerical': KernelODE.solve_K_T_ODE}
+        self.solver = {'Bessel': KernelODE.est_K_T_ODE, 'ODE': KernelODE.solve_K_T_ODE}
 
         # TODO: move this to a private mathod self._set_delta_ell
         # set delta_ell
