@@ -36,8 +36,8 @@ DEFAULT_PARS = {
     'derivative_dnu'      : 1.0,  # resolution of frequency derivative in GHz
     'normalize'           : True,  # normalize to temperature units
     'frequency_function'  : "CMB",
-    'method'              : 'numerical'  # set to 'numerical' to use scipy.odeint solver
-                                         # set to 'analytic' to use Bessel function approx.
+    'method'              : 'ODE'  # set to 'ODE' to use scipy.odeint solver
+                                         # set to 'Bessel' to use Bessel function approx.
     }
 
 # TODO: add custom frequency function
@@ -99,7 +99,7 @@ class Kernel(object):
         # TODO: add private safe ell_max parameter
 
         # dictionary for various kernel solvers
-        self.solver = {'analytic': KernelODE.est_K_T_ODE, 'numerical': KernelODE.solve_K_T_ODE}
+        self.solver = {'Bessel': KernelODE.est_K_T_ODE, 'ODE': KernelODE.solve_K_T_ODE}
 
         # TODO: move this to a private mathod self._set_delta_ell
         # set delta_ell
@@ -255,7 +255,10 @@ class Kernel(object):
             K_mLl = fh.load_kernel(self.kernel_filename, key='D1')
         else:
             print("Solving kernel ODE for d=1")
-            K_mLl = self.solver[self.method](self.pars, save_kernel=self.save_kernel)
+            try:
+                K_mLl = self.solver[self.method](self.pars, save_kernel=self.save_kernel)
+            except KeyError as e :
+                raise type(e)(f"'{self.method}' is not a valid key. Use one of the following: {self.solver.keys()}")
 
         return K_mLl
 
@@ -263,18 +266,18 @@ class Kernel(object):
         """return the DC aberration kernel elements K^m_{\ell' \ell} for d!=1
         if the kernel has been calculated before, it will be loaded
         otherwise it will be calculated using the ODE"""
-        # FIXME: revise the logic here
-        #if fh.file_exists(self.kernel_filename) and self.overwrite is False:
-        #    print("Using Kernel for d=1 from file")
-        #    _K_d_mLl = fh.load_kernel(self.kernel_filename, key='D1')
-            #self._mLl_d1 = fh.load_kernel(self.kernel_filename, key='D1')
-        #else:
-            #print("Solving kernel ODE for d=1")
-            #self._mLl_d1 = self._get_mLl_d1()
+
+        # if fh.file_exists(self.kernel_filename) and self.overwrite is False:
+        #     print("Using Kernel for d=1 from file")
+        #     # FIXME: should this be removed?
+        #     #self._mLl_d1 = fh.load_kernel(self.kernel_filename, key='D1')
+        # else:
+        #     #print("Solving kernel ODE for d=1")
+        #     #self._mLl_d1 = self._get_mLl_d1()
+
 
         _K_d_mLl = kr.get_K_d(self, self.d, self.s)
 
-        #pdb.set_trace()
         return _K_d_mLl
 
     def nu_mLl(self, nu):
